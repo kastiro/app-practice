@@ -23,25 +23,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.home:
-                    replaceFramgent(HomepageFragment());
-                    break;
-                case R.id.market:
-                    replaceFramgent(StoreFragment());
-                    break;
-                case R.id.timetable:
-                    replaceFramgent(TimetableFragment());
-                    break;
-                case R.id.profile:
-                    replaceFramgent(ProfileFragment());
-                    break;
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.home) {
+                replaceFragment(new HomepageFragment());
+            } else if (itemId == R.id.market) {
+                replaceFragment(new StoreFragment());
+            } else if (itemId == R.id.timetable) {
+                replaceFragment(new TimetableFragment());
+            } else if (itemId == R.id.profile) {
+                replaceFragment(new ProfileFragment());
             }
+
             return true;
         });
+
+        replaceFragment(new HomepageFragment());
     }
 
-    private void replaceFramgent (Fragment fragment) {
+    private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
