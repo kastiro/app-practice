@@ -5,6 +5,7 @@
     <string name="hello_store_fragment">Hello store fragment</string>
     <string name="hello_timetable_fragment">Hello timetable fragment</string>
     <string name="hello_profile_fragment">Hello profile fragment</string>
+    <string name="Timetable_Welcome">Welcome</string>
 
 
 </resources>
