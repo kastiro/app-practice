@@ -1,10 +1,12 @@
 package com.example.appdevelopmentprojectfinal;
 
+import androidx.annotation.NonNull;
+
 public class TimeSlot {
-    private String day;
-    private String startTime;
-    private String endTime;
-    private String location;
+    private final String day;
+    private final String startTime;
+    private final String endTime;
+    private final String location;
 
     public TimeSlot(String day, String startTime, String endTime, String location) {
         this.day = day;
@@ -18,4 +20,10 @@ public class TimeSlot {
     public String getStartTime() { return startTime; }
     public String getEndTime() { return endTime; }
     public String getLocation() { return location; }
+    
+    @NonNull
+    @Override
+    public String toString() {
+        return day + " " + startTime + "-" + endTime + " at " + location;
+    }
 }

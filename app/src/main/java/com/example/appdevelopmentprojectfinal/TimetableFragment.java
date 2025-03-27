@@ -1,7 +1,8 @@
 package com.example.appdevelopmentprojectfinal;
+
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log; // I may implement logs?
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,29 +22,31 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class TimetableFragment extends Fragment {
+    private static final String TIMETABLE_FILENAME = "timetable.json";
 
-
-    private List<ModuleSchedule> moduleSchedules = new ArrayList<>();
+    private final List<ModuleSchedule> moduleSchedules = new ArrayList<>();
     private TableLayout timetableGrid;
     private TextView emptyView;
 
     // Define time slots for the timetable
-    private final String[] TIME_SLOTS = {
+    private static final String[] TIME_SLOTS = {
             "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00",
             "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00"
     };
 
     // Define days for the timetable
-    private final String[] DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+    private static final String[] DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
 
-    // Colors for different modules (just a simple example) (NOT DONE YET)
-    private final int[] MODULE_COLORS = {
+    // Colors for different modules
+    private static final int[] MODULE_COLORS = {
             Color.parseColor("#FFCDD2"), // Light Red
             Color.parseColor("#C8E6C9"), // Light Green
             Color.parseColor("#BBDEFB"), // Light Blue
@@ -60,11 +64,16 @@ public class TimetableFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_timetable, container, false);
-
+        return inflater.inflate(R.layout.fragment_timetable, container, false);
+    }
+    
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
         timetableGrid = view.findViewById(R.id.timetable_grid);
         emptyView = view.findViewById(R.id.empty_view);
 
@@ -73,8 +82,6 @@ public class TimetableFragment extends Fragment {
 
         // Display the timetable
         displayTimetable();
-
-        return view;
     }
 
     private void displayTimetable() {
@@ -94,7 +101,10 @@ public class TimetableFragment extends Fragment {
         for (String timeSlot : TIME_SLOTS) {
             timetableMap.put(timeSlot, new HashMap<>());
             for (String day : DAYS) {
-                timetableMap.get(timeSlot).put(day, new ArrayList<>());
+                Map<String, List<ModuleSchedule>> dayMap = timetableMap.get(timeSlot);
+            if (dayMap != null) {
+                dayMap.put(day, new ArrayList<>());
+            }
             }
         }
 
@@ -112,7 +122,13 @@ public class TimetableFragment extends Fragment {
 
                 // If this time slot is within the module's time range
                 if (isTimeInRange(slotStart, startTime, endTime)) {
-                    timetableMap.get(timeSlot).get(day).add(schedule);
+                    Map<String, List<ModuleSchedule>> dayMap = timetableMap.get(timeSlot);
+                    if (dayMap != null) {
+                        List<ModuleSchedule> schedules = dayMap.get(day);
+                        if (schedules != null) {
+                            schedules.add(schedule);
+                        }
+                    }
                 }
             }
         }
@@ -132,7 +148,14 @@ public class TimetableFragment extends Fragment {
 
             // Add cells for each day
             for (String day : DAYS) {
-                List<ModuleSchedule> schedulesForSlot = timetableMap.get(timeSlot).get(day);
+                List<ModuleSchedule> schedulesForSlot = new ArrayList<>();
+                Map<String, List<ModuleSchedule>> dayMap = timetableMap.get(timeSlot);
+                if (dayMap != null) {
+                    List<ModuleSchedule> slots = dayMap.get(day);
+                    if (slots != null) {
+                        schedulesForSlot = slots;
+                    }
+                }
 
                 if (schedulesForSlot.isEmpty()) {
                     // Empty cell
@@ -144,6 +167,7 @@ public class TimetableFragment extends Fragment {
                     row.addView(emptyCell);
                 } else {
                     // Module cell
+                    // TODO: Handle multiple modules in the same time slot properly
                     ModuleSchedule schedule = schedulesForSlot.get(0); // Just take the first one if multiple
                     Module module = schedule.getModule();
 
@@ -189,15 +213,26 @@ public class TimetableFragment extends Fragment {
     }
 
     private void handleModuleClick(ModuleSchedule schedule) {
-        // Well implement rescheduling later
-        // We'll implement a dialog or other UI for rescheduling in the next steps
+        // Display basic module information for now
+        String moduleInfo = String.format("%s\n%s\n%s", 
+                schedule.getModule().toString(),
+                schedule.getTimeSlot().toString(),
+                schedule.isMovable() ? "Can be rescheduled" : "Fixed schedule");
+                
+        Toast.makeText(requireContext(), moduleInfo, Toast.LENGTH_LONG).show();
+        
+        // TODO: Implement rescheduling functionality in a future update
+        // This will involve displaying alternative slots from the JSON and
+        // allowing the user to select one
     }
 
     private void loadTimetableData() {
         try {
             // Reading the JSON file
-            String jsonString = loadJSONFromAsset("timetable.json");
+            String jsonString = loadJSONFromAsset();
             if (jsonString == null) {
+                Log.e("TimetableFragment", "Failed to load timetable JSON");
+                Toast.makeText(requireContext(), "Failed to load timetable data", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -212,7 +247,7 @@ public class TimetableFragment extends Fragment {
             for (int i = 0; i < modulesArray.length(); i++) {
                 JSONObject moduleObj = modulesArray.getJSONObject(i);
 
-                // Creating Modules in Module class with the below
+                // Create module object
                 Module module = new Module(
                         moduleObj.getString("code"),
                         moduleObj.getString("name"),
@@ -223,7 +258,8 @@ public class TimetableFragment extends Fragment {
                 JSONArray slotsArray = moduleObj.getJSONArray("slots");
                 for (int j = 0; j < slotsArray.length(); j++) {
                     JSONObject slotObj = slotsArray.getJSONObject(j);
-                // Creating slots in TimeSlot class using the below
+                    
+                    // Create time slot
                     TimeSlot timeSlot = new TimeSlot(
                             slotObj.getString("day"),
                             slotObj.getString("startTime"),
@@ -231,31 +267,35 @@ public class TimetableFragment extends Fragment {
                             slotObj.getString("location")
                     );
 
-                    // isMovable will be used for an implementation of moving slots to alternatives later.
+                    // isMovable flag for future rescheduling functionality
                     boolean isMovable = slotObj.getBoolean("isMovable");
 
                     moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
                 }
             }
 
+            Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " module schedules");
 
         } catch (JSONException e) {
-            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
+            Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private String loadJSONFromAsset(String fileName) {
-        String json = null;
+    private String loadJSONFromAsset() {
         try {
-            InputStream inputStream = getActivity().getAssets().open(fileName);
+            InputStream inputStream = requireActivity().getAssets().open(TIMETABLE_FILENAME);
             int size = inputStream.available();
             byte[] buffer = new byte[size];
-            inputStream.read(buffer);
+            int bytesRead = inputStream.read(buffer);
             inputStream.close();
-            json = new String(buffer, "UTF-8");
+            if (bytesRead != size) {
+                Log.e("TimetableFragment", "Failed to read entire file. Expected: " + size + ", Read: " + bytesRead);
+            }
+            return new String(buffer, StandardCharsets.UTF_8);
         } catch (IOException e) {
+            Log.e("TimetableFragment", "Error loading JSON: " + e.getMessage());
             return null;
         }
-        return json;
     }
 }

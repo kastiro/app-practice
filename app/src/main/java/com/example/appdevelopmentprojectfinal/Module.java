@@ -1,9 +1,11 @@
 package com.example.appdevelopmentprojectfinal;
 
+import androidx.annotation.NonNull;
+
 public class Module {
-    private String code;
-    private String name;
-    private String lecturer;
+    private final String code;
+    private final String name;
+    private final String lecturer;
 
     public Module(String code, String name, String lecturer) {
         this.code = code;
@@ -14,5 +16,13 @@ public class Module {
     // Getters
     public String getCode() { return code; }
     public String getName() { return name; }
-    public String getLecturer() { return lecturer; }
+    
+    // This is used in toString() method
+    String getLecturer() { return lecturer; }
+    
+    @NonNull
+    @Override
+    public String toString() {
+        return code + ": " + name + " (" + lecturer + ")";
+    }
 }
