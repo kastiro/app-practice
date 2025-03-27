@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
                 replaceFragment(new StoreFragment());
             } else if (itemId == R.id.timetable) {
                 replaceFragment(new TimetableFragment());
+            } else if (itemId == R.id.calendar) {
+                replaceFragment(new CalendarFragment());
             } else if (itemId == R.id.profile) {
                 replaceFragment(new ProfileFragment());
             }

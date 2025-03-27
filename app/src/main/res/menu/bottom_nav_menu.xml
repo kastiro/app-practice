@@ -10,6 +10,9 @@
     <item android:title="Timetable"
         android:icon="@drawable/baseline_access_time_24"
         android:id="@+id/timetable"/>
+    <item android:title="@string/calendar"
+        android:icon="@drawable/baseline_calendar_month_24"
+        android:id="@+id/calendar"/>
     <item android:title="Profile"
         android:icon="@drawable/baseline_account_circle_24"
         android:id="@+id/profile"/>
