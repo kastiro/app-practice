@@ -54,14 +54,6 @@ public class TimetableFragment extends Fragment {
         // Required empty public constructor
     }
 
-    // Ignore the code below, PARAM standard code (not touching them to avoid bigger problems)
-    public static TimetableFragment newInstance() {
-        TimetableFragment fragment = new TimetableFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
