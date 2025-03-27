@@ -1,4 +1,4 @@
-package com.example.appdevelopmentprojectfinal;
+package com.example.appdevelopmentprojectfinal.timetable;
 
 public class ModuleSchedule {
     private Module module;
