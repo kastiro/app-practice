@@ -1,14 +1,14 @@
 package com.example.appdevelopmentprojectfinal;
-
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
+import android.util.Log; // I may implement logs?
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
@@ -26,12 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 public class TimetableFragment extends Fragment {
-    private static final String TAG = "TimetableFragment";
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    private String mParam1;
-    private String mParam2;
+
     private List<ModuleSchedule> moduleSchedules = new ArrayList<>();
     private TableLayout timetableGrid;
     private TextView emptyView;
@@ -45,7 +41,7 @@ public class TimetableFragment extends Fragment {
     // Define days for the timetable
     private final String[] DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
 
-    // Colors for different modules (just a simple example)
+    // Colors for different modules (just a simple example) (NOT DONE YET)
     private final int[] MODULE_COLORS = {
             Color.parseColor("#FFCDD2"), // Light Red
             Color.parseColor("#C8E6C9"), // Light Green
@@ -58,11 +54,10 @@ public class TimetableFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static TimetableFragment newInstance(String param1, String param2) {
+    // Ignore the code below, PARAM standard code (not touching them to avoid bigger problems)
+    public static TimetableFragment newInstance() {
         TimetableFragment fragment = new TimetableFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,10 +65,6 @@ public class TimetableFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -95,17 +86,19 @@ public class TimetableFragment extends Fragment {
     }
 
     private void displayTimetable() {
+        // if timetable is empty we make emptyView (a message notice) visible
         if (moduleSchedules.isEmpty()) {
             emptyView.setVisibility(View.VISIBLE);
             return;
         }
 
+        // Here, the emptyView message will be gone and we continue.
         emptyView.setVisibility(View.GONE);
 
         // Create a map to store modules by time and day
         Map<String, Map<String, List<ModuleSchedule>>> timetableMap = new HashMap<>();
 
-        // Initialize the map for all time slots and days
+        // Gathering the time and day information (module information)
         for (String timeSlot : TIME_SLOTS) {
             timetableMap.put(timeSlot, new HashMap<>());
             for (String day : DAYS) {
@@ -204,17 +197,15 @@ public class TimetableFragment extends Fragment {
     }
 
     private void handleModuleClick(ModuleSchedule schedule) {
-        // For now, just log. We'll implement rescheduling later
-        Log.d(TAG, "Module clicked: " + schedule.getModule().getCode());
-        // We'll implement a dialog or other UI for rescheduling in the next step
+        // Well implement rescheduling later
+        // We'll implement a dialog or other UI for rescheduling in the next steps
     }
 
     private void loadTimetableData() {
         try {
-            // Read the JSON file from assets
+            // Reading the JSON file
             String jsonString = loadJSONFromAsset("timetable.json");
             if (jsonString == null) {
-                Log.e(TAG, "Could not load JSON file");
                 return;
             }
 
@@ -229,7 +220,7 @@ public class TimetableFragment extends Fragment {
             for (int i = 0; i < modulesArray.length(); i++) {
                 JSONObject moduleObj = modulesArray.getJSONObject(i);
 
-                // Create module
+                // Creating Modules in Module class with the below
                 Module module = new Module(
                         moduleObj.getString("code"),
                         moduleObj.getString("name"),
@@ -240,7 +231,7 @@ public class TimetableFragment extends Fragment {
                 JSONArray slotsArray = moduleObj.getJSONArray("slots");
                 for (int j = 0; j < slotsArray.length(); j++) {
                     JSONObject slotObj = slotsArray.getJSONObject(j);
-
+                // Creating slots in TimeSlot class using the below
                     TimeSlot timeSlot = new TimeSlot(
                             slotObj.getString("day"),
                             slotObj.getString("startTime"),
@@ -248,16 +239,16 @@ public class TimetableFragment extends Fragment {
                             slotObj.getString("location")
                     );
 
+                    // isMovable will be used for an implementation of moving slots to alternatives later.
                     boolean isMovable = slotObj.getBoolean("isMovable");
 
                     moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
                 }
             }
 
-            Log.d(TAG, "Loaded " + moduleSchedules.size() + " module schedules");
 
         } catch (JSONException e) {
-            Log.e(TAG, "JSON parsing error: " + e.getMessage());
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -271,7 +262,6 @@ public class TimetableFragment extends Fragment {
             inputStream.close();
             json = new String(buffer, "UTF-8");
         } catch (IOException e) {
-            Log.e(TAG, "Error reading JSON file: " + e.getMessage());
             return null;
         }
         return json;
