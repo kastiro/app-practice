@@ -1,4 +1,4 @@
-package com.example.appdevelopmentprojectfinal;
+package com.example.appdevelopmentprojectfinal.calendar;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,14 +9,21 @@ import android.widget.TextView;
 import android.graphics.Color;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class CalendarFragment extends Fragment {
+import com.example.appdevelopmentprojectfinal.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CalendarFragment extends Fragment implements EventAdapter.OnEventClickListener {
 
     private TextView textViewCalendarTitle;
     private CalendarView calendarView;
     private TextView textViewEvents;
     private RecyclerView recyclerViewEvents;
+    private EventAdapter eventAdapter;
     
     // Tab views
     private TextView tabTodo;
@@ -28,6 +35,9 @@ public class CalendarFragment extends Fragment {
     
     // Selected date (milliseconds since epoch)
     private long selectedDate;
+    
+    // Event list
+    private List<Event> allEvents;
 
     public CalendarFragment() {
     }
@@ -51,6 +61,12 @@ public class CalendarFragment extends Fragment {
         // Set default selected date to today
         selectedDate = System.currentTimeMillis();
         
+        // Initialize events list
+        initializeEventsList();
+        
+        // Setup RecyclerView
+        setupRecyclerView();
+        
         // Setup tab click listeners
         setupTabListeners();
         
@@ -64,6 +80,18 @@ public class CalendarFragment extends Fragment {
         loadItems();
         
         return view;
+    }
+    
+    private void setupRecyclerView() {
+        recyclerViewEvents.setLayoutManager(new LinearLayoutManager(getContext()));
+        eventAdapter = new EventAdapter(getContext(), new ArrayList<>());
+        eventAdapter.setOnEventClickListener(this);
+        recyclerViewEvents.setAdapter(eventAdapter);
+    }
+    
+    private void initializeEventsList() {
+        allEvents = new ArrayList<>();
+        // Events will be added later from data source
     }
     
     private void setupTabListeners() {
@@ -128,7 +156,23 @@ public class CalendarFragment extends Fragment {
     
     private void loadItems() {
         StringBuilder headerBuilder = new StringBuilder();
+        List<Event> filteredEvents = new ArrayList<>();
         
+        // Filter events based on the selected tab
+        for (Event event : allEvents) {
+            if (currentTab == 0 && event.isTodo()) {
+                filteredEvents.add(event);
+            } else if (currentTab == 1 && event.isEvent()) {
+                filteredEvents.add(event);
+            } else if (currentTab == 2) {
+                filteredEvents.add(event);
+            }
+        }
+        
+        // Update adapter with filtered events
+        eventAdapter.updateEvents(filteredEvents);
+        
+        // Build header text
         switch (currentTab) {
             case 0:
                 headerBuilder.append("To-Do");
@@ -155,5 +199,15 @@ public class CalendarFragment extends Fragment {
         }
         
         textViewEvents.setText(headerBuilder.toString());
+    }
+    
+    @Override
+    public void onEventClick(Event event, int position) {
+        // Event click
+    }
+    
+    @Override
+    public void onTodoStatusChanged(Event event, int position, boolean isChecked) {
+       
     }
 } 
