@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.appdevelopmentprojectfinal.databinding.ActivityMainBinding;
 import com.example.appdevelopmentprojectfinal.timetable.TimetableFragment;
+import com.example.appdevelopmentprojectfinal.calendar.CalendarFragment;
 
 public class MainActivity extends AppCompatActivity {
 
