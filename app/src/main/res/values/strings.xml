@@ -13,4 +13,53 @@
     <string name="all">All</string>
 
     <item name="calendar" type="id" />
+    
+    <!-- Marketplace Strings -->
+    <string name="marketplace_title">Marketplace</string>
+    <string name="recommended_courses">Recommended Courses</string>
+    <string name="trending_courses">Trending Courses</string>
+    <string name="no_courses_found">No courses found</string>
+    <string name="no_recommended_courses">No courses found matching your interests</string>
+    <string name="no_trending_courses">No trending courses available</string>
+    <string name="search_courses_hint">Search courses…</string>
+    <string name="wallet_balance">Wallet: %s</string>
+    
+    <!-- Course Detail Strings -->
+    <string name="preview_content">Preview Content</string>
+    <string name="description">Description</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_reviews">No reviews yet</string>
+    <string name="related_courses">Related Courses</string>
+    <string name="cancel">Cancel</string>
+    <string name="buy_price">Buy - %s</string>
+    <string name="video_error_message">Error playing video</string>
+    <string name="video_loading_error_message">Error loading video: %s</string>
+    <string name="owned">Owned</string>
+    <string name="confirm_purchase">Confirm Purchase</string>
+    <string name="purchase_question">Are you sure you want to purchase this course?</string>
+    <string name="course_label">Course:</string>
+    <string name="price_label">Price:</string>
+    <string name="balance_label">Balance:</string>
+    <string name="new_balance_label">New Balance:</string>
+    <string name="confirm">Confirm</string>
+    <string name="purchase_successful">Purchase successful!</string>
+    <string name="purchase_failed">Purchase failed. Insufficient funds.</string>
+    <string name="insufficient_funds">Insufficient funds to complete this purchase.</string>
+    <string name="user_not_found">User not found</string>
+    <string name="already_owned">You already own this course</string>
+    <string name="by_author">By: %s</string>
+    <string name="rating_count">%.1f (%d)</string>
+    <string name="course_not_found">Course not found</string>
+    <string name="course_id_missing">Error: Course ID not provided</string>
+    <string name="dialog_error">An error occurred. Please try again.</string>
+    
+    <!-- Preview Content Strings -->
+    <string name="preview">Preview</string>
+    <string name="preview_contains">This preview contains</string>
+    <string name="video">video</string>
+    <string name="videos">videos</string>
+    <string name="image">image</string>
+    <string name="images">images</string>
+    <string name="and">and</string>
+    <string name="preview_tap_to_see">Tap to see preview content</string>
 </resources>

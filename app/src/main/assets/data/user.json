@@ -1,0 +1,14 @@
+{
+  "email": "student@ul.ie",
+  "firstName": "John",
+  "lastName": "Smith",
+  "middleName": "",
+  "phoneNumber": "+353 89 123 4567",
+  "year": 3,
+  "course": "LM051",
+  "department": "Computer Science & Information Systems",
+  "modules": ["CS4084", "CS4106", "CS4116", "CS4187", "CS4457"],
+  "profilePhoto": "profile_default.jpg",
+  "ownedCourses": ["CS4084-1", "CS4457-2"],
+  "wallet": 120.50
+}

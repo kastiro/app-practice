@@ -1,0 +1,382 @@
+{
+  "courses": [
+    {
+      "id": "CS4084-1",
+      "name": "Android Programming Essentials",
+      "relatedModule": "CS4084",
+      "description": "A comprehensive guide to Android app development with Java and Android Studio. Perfect for beginners looking to understand the Android ecosystem.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Introduction to Android",
+            "items": [
+              {"type": "video", "url": "android_intro.mp4", "title": "Android Ecosystem Overview"},
+              {"type": "text", "content": "Android is an open source, Linux-based operating system designed primarily for touchscreen mobile devices..."},
+              {"type": "image", "url": "android_architecture.jpg", "caption": "Android Architecture"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Building Your First App",
+            "items": [
+              {"type": "video", "url": "first_app.mp4", "title": "Setting Up Android Studio"},
+              {"type": "text", "content": "In this chapter, we'll create a simple Hello World application..."},
+              {"type": "image", "url": "activity_lifecycle.jpg", "caption": "Activity Lifecycle"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Introduction to Android Studio",
+          "items": [
+            {"type": "video", "url": "preview_android_studio.mp4", "title": "Android Studio Overview"},
+            {"type": "text", "content": "Android Studio is the official integrated development environment (IDE) for Android app development..."}
+          ]
+        }
+      },
+      "price": 24.99,
+      "logo": "android_logo.png",
+      "tags": ["android", "mobile", "java", "programming"],
+      "author": "john.noll@ul.ie",
+      "reviews": [
+        {"user": "mike@ul.ie", "rating": 4.5, "comment": "Great content, very helpful for beginners!"},
+        {"user": "lisa@ul.ie", "rating": 5.0, "comment": "Excellent course, helped me pass the module with an A grade!"}
+      ],
+      "averageRating": 4.75,
+      "statistics": {
+        "totalPurchases": 178,
+        "viewsToday": 23,
+        "purchasesToday": 5
+      }
+    },
+    {
+      "id": "CS4084-2",
+      "name": "Advanced UI Design for Android",
+      "relatedModule": "CS4084",
+      "description": "Learn advanced techniques for creating beautiful, responsive user interfaces in Android applications.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Material Design Principles",
+            "items": [
+              {"type": "video", "url": "material_design.mp4", "title": "Understanding Material Design"},
+              {"type": "text", "content": "Material Design is a design language developed by Google that uses grid-based layouts, responsive animations..."},
+              {"type": "image", "url": "material_components.jpg", "caption": "Material Components"}
+            ]
+          },
+          {
+            "title": "Chapter 2: ConstraintLayout Mastery",
+            "items": [
+              {"type": "video", "url": "constraint_layout.mp4", "title": "Building Responsive Layouts"},
+              {"type": "text", "content": "ConstraintLayout allows you to create large, complex layouts with a flat view hierarchy..."},
+              {"type": "image", "url": "constraint_example.jpg", "caption": "Complex Layout Example"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Introduction to Material Design",
+          "items": [
+            {"type": "video", "url": "preview_material.mp4", "title": "Material Design Overview"},
+            {"type": "text", "content": "Material Design is a unified system that combines theory, resources, and tools for crafting digital experiences..."}
+          ]
+        }
+      },
+      "price": 29.99,
+      "logo": "ui_design_logo.png",
+      "tags": ["android", "ui", "design", "material design"],
+      "author": "david.hunt@ul.ie",
+      "reviews": [
+        {"user": "sarah@ul.ie", "rating": 4.0, "comment": "Very detailed content on UI design principles."},
+        {"user": "james@ul.ie", "rating": 4.5, "comment": "The ConstraintLayout section saved me hours of work!"}
+      ],
+      "averageRating": 4.25,
+      "statistics": {
+        "totalPurchases": 142,
+        "viewsToday": 19,
+        "purchasesToday": 3
+      }
+    },
+    {
+      "id": "CS4106-1",
+      "name": "Python for Machine Learning",
+      "relatedModule": "CS4106",
+      "description": "A practical introduction to machine learning concepts and algorithms using Python and popular libraries.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Python Essentials for ML",
+            "items": [
+              {"type": "video", "url": "python_basics.mp4", "title": "Python Fundamentals"},
+              {"type": "text", "content": "Python has become the language of choice for machine learning due to its simplicity and powerful libraries..."},
+              {"type": "image", "url": "python_libraries.jpg", "caption": "Python ML Ecosystem"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Supervised Learning",
+            "items": [
+              {"type": "video", "url": "supervised_learning.mp4", "title": "Classification and Regression"},
+              {"type": "text", "content": "Supervised learning involves training models on labeled data to make predictions..."},
+              {"type": "image", "url": "decision_tree.jpg", "caption": "Decision Tree Example"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Introduction to NumPy and Pandas",
+          "items": [
+            {"type": "video", "url": "preview_numpy.mp4", "title": "NumPy Arrays"},
+            {"type": "text", "content": "NumPy is the fundamental package for scientific computing in Python, providing support for large, multi-dimensional arrays..."}
+          ]
+        }
+      },
+      "price": 34.99,
+      "logo": "python_ml_logo.png",
+      "tags": ["python", "machine learning", "data science", "AI"],
+      "author": "sarah.connor@ul.ie",
+      "reviews": [
+        {"user": "alex@ul.ie", "rating": 5.0, "comment": "Best ML course I've taken! Clear explanations and practical examples."},
+        {"user": "emma@ul.ie", "rating": 4.5, "comment": "Great introduction to machine learning concepts."}
+      ],
+      "averageRating": 4.75,
+      "statistics": {
+        "totalPurchases": 215,
+        "viewsToday": 31,
+        "purchasesToday": 7
+      }
+    },
+    {
+      "id": "CS4116-1",
+      "name": "Agile Development Workflow",
+      "relatedModule": "CS4116",
+      "description": "Learn how to implement Agile methodologies in software development projects, focusing on Scrum and Kanban approaches.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Agile Principles",
+            "items": [
+              {"type": "video", "url": "agile_intro.mp4", "title": "Agile Manifesto Explained"},
+              {"type": "text", "content": "The Agile Manifesto values individuals and interactions over processes and tools..."},
+              {"type": "image", "url": "agile_vs_waterfall.jpg", "caption": "Agile vs Waterfall"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Scrum Framework",
+            "items": [
+              {"type": "video", "url": "scrum_overview.mp4", "title": "Scrum Roles and Events"},
+              {"type": "text", "content": "Scrum is an agile framework that helps teams work together through regular cadences..."},
+              {"type": "image", "url": "scrum_process.jpg", "caption": "Scrum Process Flow"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Introduction to Agile",
+          "items": [
+            {"type": "video", "url": "preview_agile.mp4", "title": "Why Agile?"},
+            {"type": "text", "content": "Agile development offers a lightweight framework for helping teams maintain focus on rapid delivery..."}
+          ]
+        }
+      },
+      "price": 27.99,
+      "logo": "agile_logo.png",
+      "tags": ["agile", "scrum", "project management", "software development"],
+      "author": "jim.buckley@ul.ie",
+      "reviews": [
+        {"user": "tom@ul.ie", "rating": 4.0, "comment": "Practical advice for implementing Agile in real projects."},
+        {"user": "kate@ul.ie", "rating": 4.5, "comment": "The Scrum section was particularly helpful for our team."}
+      ],
+      "averageRating": 4.25,
+      "statistics": {
+        "totalPurchases": 156,
+        "viewsToday": 18,
+        "purchasesToday": 4
+      }
+    },
+    {
+      "id": "CS4187-1",
+      "name": "Ethics in Computing",
+      "relatedModule": "CS4187",
+      "description": "Explore ethical issues in computing, including privacy, security, intellectual property, and professional responsibility.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Ethics Foundations",
+            "items": [
+              {"type": "video", "url": "ethics_intro.mp4", "title": "Ethical Frameworks"},
+              {"type": "text", "content": "Ethics in computing draws from established ethical theories to address new challenges..."},
+              {"type": "image", "url": "ethical_frameworks.jpg", "caption": "Ethical Decision Making"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Privacy in the Digital Age",
+            "items": [
+              {"type": "video", "url": "privacy_concerns.mp4", "title": "Data Collection and Privacy"},
+              {"type": "text", "content": "Digital privacy concerns the rights of individuals to control their personal information..."},
+              {"type": "image", "url": "privacy_timeline.jpg", "caption": "Evolution of Privacy Concerns"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Introduction to Computing Ethics",
+          "items": [
+            {"type": "video", "url": "preview_ethics.mp4", "title": "Why Ethics Matter in Computing"},
+            {"type": "text", "content": "Computing professionals have specialized knowledge and skills and therefore have power and responsibility..."}
+          ]
+        }
+      },
+      "price": 22.99,
+      "logo": "ethics_logo.png",
+      "tags": ["ethics", "professional issues", "privacy", "security"],
+      "author": "yvonne.cliff@ul.ie",
+      "reviews": [
+        {"user": "daniel@ul.ie", "rating": 5.0, "comment": "Thought-provoking content on important ethical considerations."},
+        {"user": "sophia@ul.ie", "rating": 4.0, "comment": "Good overview of ethical issues in modern computing."}
+      ],
+      "averageRating": 4.5,
+      "statistics": {
+        "totalPurchases": 132,
+        "viewsToday": 15,
+        "purchasesToday": 2
+      }
+    },
+    {
+      "id": "CS4457-1",
+      "name": "Project Management Fundamentals",
+      "relatedModule": "CS4457",
+      "description": "Learn essential project management concepts, methodologies, and tools for successful software project delivery.",
+
+
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Project Management Frameworks",
+            "items": [
+              {"type": "video", "url": "pm_intro.mp4", "title": "PM Methodologies Overview"},
+              {"type": "text", "content": "Project management methodologies provide a framework for organizing and managing resources..."},
+              {"type": "image", "url": "pm_methodologies.jpg", "caption": "Popular PM Approaches"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Planning and Estimation",
+            "items": [
+              {"type": "video", "url": "estimation.mp4", "title": "Estimation Techniques"},
+              {"type": "text", "content": "Accurate estimation is crucial for project planning and resource allocation..."},
+              {"type": "image", "url": "gantt_chart.jpg", "caption": "Gantt Chart Example"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Project Management Introduction",
+          "items": [
+            {"type": "video", "url": "preview_pm.mp4", "title": "What is Project Management?"},
+            {"type": "text", "content": "Project management is the application of knowledge, skills, tools, and techniques to achieve specific objectives within constraints..."}
+          ]
+        }
+      },
+      "price": 26.99,
+      "logo": "pm_logo.png",
+      "tags": ["project management", "planning", "estimation", "leadership"],
+      "author": "sarah.beecham@ul.ie",
+      "reviews": [
+        {"user": "robert@ul.ie", "rating": 4.5, "comment": "Clear explanations of complex project management concepts."},
+        {"user": "laura@ul.ie", "rating": 4.0, "comment": "Very useful practical techniques for software project planning."}
+      ],
+      "averageRating": 4.25,
+      "statistics": {
+        "totalPurchases": 168,
+        "viewsToday": 21,
+        "purchasesToday": 4
+      }
+    },
+    {
+      "id": "CS4457-2",
+      "name": "Risk Management in Software Projects",
+      "relatedModule": "CS4457",
+      "description": "Develop strategies for identifying, assessing, and mitigating risks in software development projects.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: Risk Identification",
+            "items": [
+              {"type": "video", "url": "risk_intro.mp4", "title": "Common Project Risks"},
+              {"type": "text", "content": "Risk identification is the process of determining what risks might affect the project..."},
+              {"type": "image", "url": "risk_categories.jpg", "caption": "Risk Categorization"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Risk Analysis and Mitigation",
+            "items": [
+              {"type": "video", "url": "risk_analysis.mp4", "title": "Qualitative and Quantitative Analysis"},
+              {"type": "text", "content": "Once risks are identified, they need to be analyzed to determine their potential impact..."},
+              {"type": "image", "url": "risk_matrix.jpg", "caption": "Risk Assessment Matrix"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Introduction to Risk Management",
+          "items": [
+            {"type": "video", "url": "preview_risk.mp4", "title": "Why Risk Management Matters"},
+            {"type": "text", "content": "Risk management is a process for identifying, assessing, and prioritizing risks, followed by coordinated application of resources..."}
+          ]
+        }
+      },
+      "price": 28.99,
+      "logo": "risk_logo.png",
+      "tags": ["project management", "risk", "mitigation", "planning"],
+      "author": "sarah.beecham@ul.ie",
+      "reviews": [
+        {"user": "peter@ul.ie", "rating": 5.0, "comment": "Excellent framework for managing project risks."},
+        {"user": "olivia@ul.ie", "rating": 4.5, "comment": "Real-world examples made the content very applicable."}
+      ],
+      "averageRating": 4.75,
+      "statistics": {
+        "totalPurchases": 147,
+        "viewsToday": 17,
+        "purchasesToday": 3
+      }
+    },
+    {
+      "id": "ET4162-1",
+      "name": "IoT Device Programming",
+      "relatedModule": "ET4162",
+      "description": "Hands-on guide to programming IoT devices using Arduino, Raspberry Pi, and other platforms.",
+      "content": {
+        "chapters": [
+          {
+            "title": "Chapter 1: IoT Fundamentals",
+            "items": [
+              {"type": "video", "url": "iot_intro.mp4", "title": "IoT Architecture"},
+              {"type": "text", "content": "The Internet of Things refers to the network of physical objects embedded with sensors, software, and connectivity..."},
+              {"type": "image", "url": "iot_ecosystem.jpg", "caption": "IoT Ecosystem"}
+            ]
+          },
+          {
+            "title": "Chapter 2: Arduino Programming",
+            "items": [
+              {"type": "video", "url": "arduino_basics.mp4", "title": "Arduino Platform Introduction"},
+              {"type": "text", "content": "Arduino is an open-source electronics platform based on easy-to-use hardware and software..."},
+              {"type": "image", "url": "arduino_circuit.jpg", "caption": "Simple Sensor Circuit"}
+            ]
+          }
+        ],
+        "preview": {
+          "title": "Getting Started with IoT",
+          "items": [
+            {"type": "video", "url": "preview_iot.mp4", "title": "IoT Development Overview"},
+            {"type": "text", "content": "IoT development involves hardware selection, sensor integration, connectivity solutions, and programming..."}
+          ]
+        }
+      },
+      "price": 32.99,
+      "logo": "iot_logo.png",
+      "tags": ["iot", "hardware", "arduino", "raspberry pi"],
+      "author": "david.osullivan@ul.ie",
+      "reviews": [
+        {"user": "kevin@ul.ie", "rating": 4.5, "comment": "Practical approach to IoT programming with great examples."},
+        {"user": "hannah@ul.ie", "rating": 4.0, "comment": "The Arduino projects were very helpful for understanding the concepts."}
+      ],
+      "averageRating": 4.25,
+      "statistics": {
+        "totalPurchases": 124,
+        "viewsToday": 14,
+        "purchasesToday": 2
+      }
+    }
+  ]
+}
