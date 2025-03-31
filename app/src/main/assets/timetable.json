@@ -43,14 +43,14 @@
         {
           "day": "Tuesday",
           "startTime": "11:00",
-          "endTime": "13:00",
+          "endTime": "12:00",
           "location": "CS1-001",
           "isMovable": true
         },
         {
           "day": "Friday",
           "startTime": "14:00",
-          "endTime": "16:00",
+          "endTime": "15:00",
           "location": "CSG-024",
           "isMovable": false
         }

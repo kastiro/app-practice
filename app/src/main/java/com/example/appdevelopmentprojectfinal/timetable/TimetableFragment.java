@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.example.appdevelopmentprojectfinal.R;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,7 +88,7 @@ public class TimetableFragment extends Fragment {
     }
 
     private void displayTimetable() {
-        // if timetable is empty we make emptyView (a message notice) visible
+        // if timetable is empty we make  (a message notice) visible
         if (moduleSchedules.isEmpty()) {
             emptyView.setVisibility(View.VISIBLE);
             return;
@@ -103,9 +105,9 @@ public class TimetableFragment extends Fragment {
             timetableMap.put(timeSlot, new HashMap<>());
             for (String day : DAYS) {
                 Map<String, List<ModuleSchedule>> dayMap = timetableMap.get(timeSlot);
-            if (dayMap != null) {
-                dayMap.put(day, new ArrayList<>());
-            }
+                if (dayMap != null) {
+                    dayMap.put(day, new ArrayList<>());
+                }
             }
         }
 
@@ -135,7 +137,7 @@ public class TimetableFragment extends Fragment {
         }
 
         // Create the timetable rows
-        LayoutInflater inflater = getLayoutInflater();
+        LayoutInflater inflater = LayoutInflater.from(getContext());
 
         for (String timeSlot : TIME_SLOTS) {
             TableRow row = new TableRow(getContext());
@@ -154,7 +156,12 @@ public class TimetableFragment extends Fragment {
                 if (dayMap != null) {
                     List<ModuleSchedule> slots = dayMap.get(day);
                     if (slots != null) {
-                        schedulesForSlot = slots;
+                        // Filter out hidden modules
+                        for (ModuleSchedule slot : slots) {
+                            if (slot.isVisible()) {
+                                schedulesForSlot.add(slot);
+                            }
+                        }
                     }
                 }
 
@@ -184,17 +191,17 @@ public class TimetableFragment extends Fragment {
                     nameText.setText(module.getName());
                     locationText.setText(schedule.getTimeSlot().getLocation());
 
-                    // Set a background color based on the module code
+                    // Sets a background color based on the module code
                     CardView cardView = (CardView) moduleView;
                     int colorIndex = Math.abs(module.getCode().hashCode()) % MODULE_COLORS.length;
                     cardView.setCardBackgroundColor(MODULE_COLORS[colorIndex]);
 
-                    // Set layout parameters
+                    // Sets layout parameters
                     TableRow.LayoutParams params = new TableRow.LayoutParams(120, 150);
                     params.setMargins(2, 2, 2, 2);
                     moduleView.setLayoutParams(params);
 
-                    // Add click listener for rescheduling
+                    // Adds a click listener for rescheduling
                     if (schedule.isMovable()) {
                         moduleView.setOnClickListener(v -> handleModuleClick(schedule));
                     }
@@ -209,24 +216,58 @@ public class TimetableFragment extends Fragment {
 
     private boolean isTimeInRange(String timeToCheck, String startTime, String endTime) {
         // Simple string comparison for HH:MM format
-        // This assumes all times are in 24-hour format
+        // Assumes all times are in 24-hour format
         return timeToCheck.compareTo(startTime) >= 0 && timeToCheck.compareTo(endTime) < 0;
     }
 
     private void handleModuleClick(ModuleSchedule schedule) {
-        // Display basic module information for now
-        String moduleInfo = String.format("%s\n%s\n%s", 
-                schedule.getModule().toString(),
-                schedule.getTimeSlot().toString(),
-                schedule.isMovable() ? "Can be rescheduled" : "Fixed schedule");
-                
-        Toast.makeText(requireContext(), moduleInfo, Toast.LENGTH_LONG).show();
-        
-        // TODO: Implement rescheduling functionality in a future update
-        // This will involve displaying alternative slots from the JSON and
-        // allowing the user to select one
-    }
+        //create and show  bottom sheet
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
 
+        // Inflates  layout for the bottom sheet
+        View bottomSheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_module_code, null);
+
+        // Find views in the bottom sheet layout
+        TextView moduleCode = bottomSheetView.findViewById(R.id.module_code);
+        TextView moduleName = bottomSheetView.findViewById(R.id.module_name);
+        TextView moduleLecturer = bottomSheetView.findViewById(R.id.module_lecturer);
+        TextView moduleLocation = bottomSheetView.findViewById(R.id.module_location);
+        TextView moduleDay = bottomSheetView.findViewById(R.id.module_day);
+        TextView moduleStartTime = bottomSheetView.findViewById(R.id.module_start_time);
+        TextView moduleEndTime = bottomSheetView.findViewById(R.id.module_end_time);
+        Button hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
+
+        // Setting module details in the bottom sheet
+        Module module = schedule.getModule();
+        TimeSlot timeSlot = schedule.getTimeSlot();
+        moduleCode.setText(module.getCode());
+        moduleName.setText(module.getName());
+        moduleLecturer.setText(module.getLecturer());
+        moduleLocation.setText(timeSlot.getLocation());
+        moduleDay.setText(timeSlot.getDay());
+        moduleStartTime.setText(timeSlot.getStartTime());
+        moduleEndTime.setText(timeSlot.getEndTime());
+        hideShowButton.setText(schedule.isVisible() ? "Hide Module" : "Show Module");
+
+        // Set the click listener for the hide/show button
+        hideShowButton.setOnClickListener(v -> {
+                    // Toggle the visibility of the module
+                    schedule.setVisible(!schedule.isVisible());
+
+                    // Update the button text
+                    hideShowButton.setText(schedule.isVisible() ? "Hide Module" : "Show Module");
+                    displayTimetable();
+                    // Set the content view for the bottom sheet
+
+                    // Show the bottom sheet
+                    bottomSheetDialog.dismiss();
+
+                });
+
+                // Setting the content view for the bottom sheet
+                bottomSheetDialog.setContentView(bottomSheetView);
+                bottomSheetDialog.show();
+    }
     private void loadTimetableData() {
         try {
             // Reading the JSON file
@@ -268,7 +309,6 @@ public class TimetableFragment extends Fragment {
                             slotObj.getString("location")
                     );
 
-                    // isMovable flag for future rescheduling functionality
                     boolean isMovable = slotObj.getBoolean("isMovable");
 
                     moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
