@@ -1,44 +1,11 @@
 {
   "modules": [
-    {
-      "code": "CS4084",
-      "name": "Mobile Application Development",
-      "lecturer": "Dr. Smith",
-      "slots": [
-        {
-          "day": "Monday",
-          "startTime": "09:00",
-          "endTime": "11:00",
-          "location": "CSG-001",
-          "isMovable": true
-        },
-        {
-          "day": "Wednesday",
-          "startTime": "14:00",
-          "endTime": "16:00",
-          "location": "CS3-001",
-          "isMovable": true
-        }
-      ],
-      "alternativeSlots": [
-        {
-          "day": "Tuesday",
-          "startTime": "09:00",
-          "endTime": "11:00",
-          "location": "CSG-002"
-        },
-        {
-          "day": "Thursday",
-          "startTime": "14:00",
-          "endTime": "16:00",
-          "location": "CS2-001"
-        }
-      ]
-    },
+
     {
       "code": "CS4052",
       "name": "Software Engineering",
       "lecturer": "Dr. Johnson",
+      "type": "lab",
       "slots": [
         {
           "day": "Tuesday",
@@ -67,6 +34,52 @@
           "startTime": "09:00",
           "endTime": "11:00",
           "location": "CS2-002"
+        }
+      ]
+    },
+    {
+      "code": "CS4000",
+      "name": "Project Management",
+      "lecturer": "Dr. Victor",
+      "type": "lecture",
+      "slots": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "11:00",
+          "location": "CSG-061",
+          "isMovable": false
+        }
+      ]
+    },
+
+    {
+      "code": "CS4116",
+      "name": "Software Development Project",
+      "lecturer": "Dr. Conor Ryan",
+      "type": "lab",
+      "slots": [
+        {
+          "day": "Thursday",
+          "startTime": "11:00",
+          "endTime": "12:00",
+          "location": "CS1-001",
+          "isMovable": false
+        }
+      ]
+    },
+    {
+      "code": "CS4187",
+      "name": "Professional Issues in Computing",
+      "lecturer": "Dr. Eoin",
+      "type": "lab",
+      "slots": [
+        {
+          "day": "Thursday",
+          "startTime": "14:00",
+          "endTime": "15:00",
+          "location": "KBG-001",
+          "isMovable": false
         }
       ]
     }
