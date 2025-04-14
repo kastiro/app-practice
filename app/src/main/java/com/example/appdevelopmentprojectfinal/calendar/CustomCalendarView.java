@@ -100,11 +100,11 @@ public class CustomCalendarView extends View {
         headerTextPaint.setTypeface(android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD));
         
         eventDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        eventDotPaint.setColor(Color.parseColor("#FFA500")); // Orange for events
+        eventDotPaint.setColor(Color.parseColor("#FF0000")); // Red for events
         eventDotPaint.setStyle(Paint.Style.FILL);
         
         todoDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        todoDotPaint.setColor(Color.parseColor("#FF0000")); // Red for todos
+        todoDotPaint.setColor(Color.parseColor("#FFA500")); // Orange for todos
         todoDotPaint.setStyle(Paint.Style.FILL);
         
         selectedDrawable = ContextCompat.getDrawable(context, R.drawable.selected_date_background);

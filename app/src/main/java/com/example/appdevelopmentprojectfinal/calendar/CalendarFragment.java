@@ -500,18 +500,6 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         builder.create().show();
     }
     
-    @Override
-    public void onTodoStatusChanged(com.example.appdevelopmentprojectfinal.calendar.Event event, int position, boolean isChecked) {
-        // Update todo completion status
-        if (event != null) {
-            event.setCompleted(isChecked);
-            // Update list display
-            if (eventAdapter != null) {
-                eventAdapter.notifyItemChanged(position);
-            }
-        }
-    }
-    
     /**
      * Updates all event markers on the calendar
      */

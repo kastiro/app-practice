@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,7 +30,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     
     public interface OnEventClickListener {
         void onEventClick(com.example.appdevelopmentprojectfinal.calendar.Event event, int position);
-        void onTodoStatusChanged(com.example.appdevelopmentprojectfinal.calendar.Event event, int position, boolean isChecked);
     }
     
     public EventAdapter(Context context, List<com.example.appdevelopmentprojectfinal.calendar.Event> events) {
@@ -66,25 +64,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         // Set countdown text color
         setCountdownColor(holder.countdownTextView, event.getDate());
         
-        // Show/hide checkbox based on event type
+        // Set the color of the left indicator based on event type
         if (event.isTodo()) {
-            holder.checkBox.setVisibility(View.VISIBLE);
-            holder.checkBox.setChecked(event.isCompleted());
+            // Orange for TODO
+            holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_orange_light));
         } else {
-            holder.checkBox.setVisibility(View.GONE);
+            // Red for EVENT
+            holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
         }
         
         // Setup click listeners
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onEventClick(event, position);
-            }
-        });
-        
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (listener != null && event.isTodo()) {
-                event.setCompleted(isChecked);
-                listener.onTodoStatusChanged(event, position, isChecked);
             }
         });
     }
@@ -170,7 +162,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         TextView descriptionTextView;
         TextView timeTextView;
         TextView countdownTextView;
-        CheckBox checkBox;
+        View typeIndicator;
         
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -178,7 +170,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             descriptionTextView = itemView.findViewById(R.id.tv_event_description);
             timeTextView = itemView.findViewById(R.id.tv_event_time);
             countdownTextView = itemView.findViewById(R.id.tv_event_countdown);
-            checkBox = itemView.findViewById(R.id.checkbox_todo);
+            typeIndicator = itemView.findViewById(R.id.view_event_type_indicator);
         }
     }
 } 
