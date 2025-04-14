@@ -96,7 +96,8 @@ public class TimetableFragment extends Fragment {
 
         // Here, the emptyView message will be gone and we continue.
         emptyView.setVisibility(View.GONE);
-
+        // Clearing existing rows to deploy the new versions
+        //timetableGrid.removeAllViews();
         // Create a map to store modules by time and day
         Map<String, Map<String, List<ModuleSchedule>>> timetableMap = new HashMap<>();
 
@@ -256,6 +257,10 @@ public class TimetableFragment extends Fragment {
 
                     // Update the button text
                     hideShowButton.setText(schedule.isVisible() ? "Hide Module" : "Show Module");
+
+                    //updating the list by calling this
+                    loadTimetableData();
+
                     displayTimetable();
                     // Set the content view for the bottom sheet
 
