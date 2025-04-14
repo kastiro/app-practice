@@ -4,6 +4,7 @@
       "code": "CS4084",
       "name": "Mobile Application Development",
       "lecturer": "Dr. Smith",
+      "type": "lecture",
       "slots": [
         {
           "day": "Monday",
@@ -39,6 +40,7 @@
       "code": "CS4052",
       "name": "Software Engineering",
       "lecturer": "Dr. Johnson",
+      "type": "lab",
       "slots": [
         {
           "day": "Tuesday",

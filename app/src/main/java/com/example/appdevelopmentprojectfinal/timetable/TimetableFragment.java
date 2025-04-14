@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -16,6 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.appdevelopmentprojectfinal.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -32,12 +33,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TimetableFragment extends Fragment {
+public class TimetableFragment extends Fragment implements ModuleManagementAdapter.OnModuleVisibilityChangedListener {
     private static final String TIMETABLE_FILENAME = "timetable.json";
 
     private final List<ModuleSchedule> moduleSchedules = new ArrayList<>();
     private TableLayout timetableGrid;
     private TextView emptyView;
+    private RecyclerView moduleListView;
+    private ModuleManagementAdapter moduleAdapter;
 
     // Define time slots for the timetable
     private static final String[] TIME_SLOTS = {
@@ -72,23 +75,41 @@ public class TimetableFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_timetable, container, false);
     }
-    
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        
+
         timetableGrid = view.findViewById(R.id.timetable_grid);
         emptyView = view.findViewById(R.id.empty_view);
+        moduleListView = view.findViewById(R.id.module_list);
+
+        // Setup RecyclerView for module management
+        moduleListView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Load timetable data
         loadTimetableData();
+
+        // Setup module adapter
+        moduleAdapter = new ModuleManagementAdapter(moduleSchedules, this);
+        moduleListView.setAdapter(moduleAdapter);
 
         // Display the timetable
         displayTimetable();
     }
 
+    @Override
+    public void onModuleVisibilityChanged() {
+        // Refresh the timetable when module visibility changes
+        timetableGrid.removeAllViews();
+        displayTimetable();
+    }
+
     private void displayTimetable() {
-        // if timetable is empty we make  (a message notice) visible
+        // Clear existing content
+        timetableGrid.removeAllViews();
+
+        // if timetable is empty we make (a message notice) visible
         if (moduleSchedules.isEmpty()) {
             emptyView.setVisibility(View.VISIBLE);
             return;
@@ -201,10 +222,8 @@ public class TimetableFragment extends Fragment {
                     params.setMargins(2, 2, 2, 2);
                     moduleView.setLayoutParams(params);
 
-                    // Adds a click listener for rescheduling
-                    if (schedule.isMovable()) {
-                        moduleView.setOnClickListener(v -> handleModuleClick(schedule));
-                    }
+                    // Adds a click listener for showing module details
+                    moduleView.setOnClickListener(v -> handleModuleClick(schedule));
 
                     row.addView(moduleView);
                 }
@@ -221,10 +240,10 @@ public class TimetableFragment extends Fragment {
     }
 
     private void handleModuleClick(ModuleSchedule schedule) {
-        //create and show  bottom sheet
+        // Create and show bottom sheet
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
 
-        // Inflates  layout for the bottom sheet
+        // Inflates layout for the bottom sheet
         View bottomSheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_module_code, null);
 
         // Find views in the bottom sheet layout
@@ -235,7 +254,10 @@ public class TimetableFragment extends Fragment {
         TextView moduleDay = bottomSheetView.findViewById(R.id.module_day);
         TextView moduleStartTime = bottomSheetView.findViewById(R.id.module_start_time);
         TextView moduleEndTime = bottomSheetView.findViewById(R.id.module_end_time);
-        Button hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
+
+        // Remove the hide/show button as we now handle this in the module management section
+        View hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
+        hideShowButton.setVisibility(View.GONE);
 
         // Setting module details in the bottom sheet
         Module module = schedule.getModule();
@@ -247,27 +269,12 @@ public class TimetableFragment extends Fragment {
         moduleDay.setText(timeSlot.getDay());
         moduleStartTime.setText(timeSlot.getStartTime());
         moduleEndTime.setText(timeSlot.getEndTime());
-        hideShowButton.setText(schedule.isVisible() ? "Hide Module" : "Show Module");
 
-        // Set the click listener for the hide/show button
-        hideShowButton.setOnClickListener(v -> {
-                    // Toggle the visibility of the module
-                    schedule.setVisible(!schedule.isVisible());
-
-                    // Update the button text
-                    hideShowButton.setText(schedule.isVisible() ? "Hide Module" : "Show Module");
-                    displayTimetable();
-                    // Set the content view for the bottom sheet
-
-                    // Show the bottom sheet
-                    bottomSheetDialog.dismiss();
-
-                });
-
-                // Setting the content view for the bottom sheet
-                bottomSheetDialog.setContentView(bottomSheetView);
-                bottomSheetDialog.show();
+        // Setting the content view for the bottom sheet
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
     }
+
     private void loadTimetableData() {
         try {
             // Reading the JSON file
@@ -300,7 +307,7 @@ public class TimetableFragment extends Fragment {
                 JSONArray slotsArray = moduleObj.getJSONArray("slots");
                 for (int j = 0; j < slotsArray.length(); j++) {
                     JSONObject slotObj = slotsArray.getJSONObject(j);
-                    
+
                     // Create time slot
                     TimeSlot timeSlot = new TimeSlot(
                             slotObj.getString("day"),
