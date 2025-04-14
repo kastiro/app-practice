@@ -21,17 +21,17 @@ import java.util.Locale;
  */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
     
-    private List<Event> events;
+    private List<com.example.appdevelopmentprojectfinal.calendar.Event> events;
     private Context context;
     private SimpleDateFormat dateFormat;
     private OnEventClickListener listener;
     
     public interface OnEventClickListener {
-        void onEventClick(Event event, int position);
-        void onTodoStatusChanged(Event event, int position, boolean isChecked);
+        void onEventClick(com.example.appdevelopmentprojectfinal.calendar.Event event, int position);
+        void onTodoStatusChanged(com.example.appdevelopmentprojectfinal.calendar.Event event, int position, boolean isChecked);
     }
     
-    public EventAdapter(Context context, List<Event> events) {
+    public EventAdapter(Context context, List<com.example.appdevelopmentprojectfinal.calendar.Event> events) {
         this.context = context;
         this.events = events;
         this.dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
@@ -50,7 +50,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        Event event = events.get(position);
+        com.example.appdevelopmentprojectfinal.calendar.Event event = events.get(position);
         
         holder.titleTextView.setText(event.getTitle());
         holder.descriptionTextView.setText(event.getDescription());
@@ -84,7 +84,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         return events != null ? events.size() : 0;
     }
     
-    public void updateEvents(List<Event> newEvents) {
+    public void updateEvents(List<com.example.appdevelopmentprojectfinal.calendar.Event> newEvents) {
         this.events = newEvents;
         notifyDataSetChanged();
     }
