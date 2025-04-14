@@ -11,6 +11,10 @@
     <string name="events">Events</string>
     <string name="todo">To-Do</string>
     <string name="all">All</string>
+    <string name="past">Expired</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="days">days</string>
 
     <item name="calendar" type="id" />
     

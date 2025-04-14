@@ -22,7 +22,7 @@
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/checkbox_todo"
+            app:layout_constraintEnd_toStartOf="@+id/tv_event_countdown"
             tools:text="Meeting with Professor" />
 
         <TextView
@@ -35,7 +35,7 @@
             android:ellipsize="end"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_event_title"
-            app:layout_constraintEnd_toStartOf="@+id/checkbox_todo"
+            app:layout_constraintEnd_toStartOf="@+id/tv_event_countdown"
             tools:text="Discuss project progress and next steps" />
 
         <TextView
@@ -48,6 +48,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_event_description"
             tools:text="10:30 AM" />
+            
+        <TextView
+            android:id="@+id/tv_event_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FF5722"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/checkbox_todo"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="3 days" />
 
         <CheckBox
             android:id="@+id/checkbox_todo"
