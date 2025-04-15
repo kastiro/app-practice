@@ -10,8 +10,10 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.appdevelopmentprojectfinal.databinding.ActivityMainBinding;
 import com.example.appdevelopmentprojectfinal.timetable.TimetableFragment;
 import com.example.appdevelopmentprojectfinal.calendar.CalendarFragment;
+import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TIMETABLE_FILENAME = "timetable.json";
 
     ActivityMainBinding binding;
     @Override
@@ -37,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+
+        JsonUtil jsonUtil = new JsonUtil();
+        jsonUtil.copyFileToInternalStorageIfNeeded(this, TIMETABLE_FILENAME);
 
         replaceFragment(new HomepageFragment());
     }

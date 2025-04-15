@@ -19,19 +19,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.appdevelopmentprojectfinal.R;
+import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import android.content.Context;
 
 public class TimetableFragment extends Fragment implements ModuleManagementAdapter.OnModuleVisibilityChangedListener {
     private static final String TIMETABLE_FILENAME = "timetable.json";
@@ -300,7 +300,8 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 Module module = new Module(
                         moduleObj.getString("code"),
                         moduleObj.getString("name"),
-                        moduleObj.getString("lecturer")
+                        moduleObj.getString("lecturer"),
+                        Boolean.parseBoolean(moduleObj.getString("show"))
                 );
 
                 // Process current slots
@@ -318,7 +319,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
 
                     boolean isMovable = slotObj.getBoolean("isMovable");
 
-                    moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
+                    moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable, module.isShow()));
                 }
             }
 
@@ -331,19 +332,8 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
     }
 
     private String loadJSONFromAsset() {
-        try {
-            InputStream inputStream = requireActivity().getAssets().open(TIMETABLE_FILENAME);
-            int size = inputStream.available();
-            byte[] buffer = new byte[size];
-            int bytesRead = inputStream.read(buffer);
-            inputStream.close();
-            if (bytesRead != size) {
-                Log.e("TimetableFragment", "Failed to read entire file. Expected: " + size + ", Read: " + bytesRead);
-            }
-            return new String(buffer, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            Log.e("TimetableFragment", "Error loading JSON: " + e.getMessage());
-            return null;
-        }
+            JsonUtil jsonUtil = new JsonUtil();
+            Context tempContext = requireContext();
+            return jsonUtil.readFileFromInternalStorage(tempContext);
     }
 }

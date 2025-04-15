@@ -1,5 +1,6 @@
 package com.example.appdevelopmentprojectfinal.timetable;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 
 public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManagementAdapter.ModuleViewHolder> {
 
@@ -140,13 +142,19 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         int colorIndex = Math.abs(module.getCode().hashCode()) % MODULE_COLORS.length;
         holder.cardView.setCardBackgroundColor(MODULE_COLORS[colorIndex]);
 
+        JsonUtil jsonUtil = new JsonUtil();
+        Context tempContext = holder.cardView.getContext();
+        Boolean moduleStatus = jsonUtil.getShowStatusForModule(tempContext, module.getCode());
         // Set switch state
-        holder.visibilityToggle.setChecked(moduleGroup.isAllVisible());
+        holder.visibilityToggle.setChecked(moduleStatus);
+        moduleGroup.setAllVisible(moduleStatus);
 
         // Set up toggle listener
         holder.visibilityToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             moduleGroup.setAllVisible(isChecked);
             listener.onModuleVisibilityChanged();
+            // Update show status in JSON file
+            jsonUtil.updateShowStatusAndSave(tempContext, module.getCode(), isChecked);
         });
     }
 

@@ -5,6 +5,7 @@
       "name": "Mobile Application Development",
       "lecturer": "Dr. Smith",
       "type": "lecture",
+      "show": true,
       "slots": [
         {
           "day": "Monday",
@@ -41,6 +42,7 @@
       "name": "Software Engineering",
       "lecturer": "Dr. Johnson",
       "type": "lab",
+      "show": false,
       "slots": [
         {
           "day": "Tuesday",

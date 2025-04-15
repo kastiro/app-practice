@@ -5,11 +5,11 @@ public class ModuleSchedule {
     private TimeSlot timeSlot;
     private boolean isMovable;
     private boolean isVisible;
-    public ModuleSchedule(Module module, TimeSlot timeSlot, boolean isMovable) {
+    public ModuleSchedule(Module module, TimeSlot timeSlot, boolean isMovable, boolean isVisible) {
         this.module = module;
         this.timeSlot = timeSlot;
         this.isMovable = isMovable;
-        this.isVisible = true;
+        this.isVisible = isVisible;
     }
 
     // Getters
