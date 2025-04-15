@@ -1,11 +1,13 @@
 package com.example.appdevelopmentprojectfinal.timetable;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -32,7 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import androidx.appcompat.widget.SwitchCompat;
 public class TimetableFragment extends Fragment implements ModuleManagementAdapter.OnModuleVisibilityChangedListener {
     private static final String TIMETABLE_FILENAME = "timetable.json";
 
@@ -248,9 +250,11 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         TextView moduleDay = bottomSheetView.findViewById(R.id.module_day);
         TextView moduleStartTime = bottomSheetView.findViewById(R.id.module_start_time);
         TextView moduleEndTime = bottomSheetView.findViewById(R.id.module_end_time);
+        androidx.appcompat.widget.SwitchCompat notificationToggle = bottomSheetView.findViewById(R.id.notification_toggle);
 
-        View hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
-        hideShowButton.setVisibility(View.GONE);
+        // Canceled hideShow button from inside the bottom sheet (when pressing on modules)
+        // View hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
+        // hideShowButton.setVisibility(View.GONE);
 
         // Setting details in the bottom sheet
         Module module = schedule.getModule();
@@ -262,6 +266,28 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         moduleDay.setText(timeSlot.getDay());
         moduleStartTime.setText(timeSlot.getStartTime());
         moduleEndTime.setText(timeSlot.getEndTime());
+
+        notificationToggle.setChecked(schedule.isNotificationsEnabled());
+        // listener for the notification toggle
+        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            schedule.setNotificationsEnabled(isChecked);
+
+            Context context = requireContext();
+
+            if (isChecked) {
+                // Schedule notification
+                TimetableNotificationManager.scheduleNotification(context, schedule);
+                Toast.makeText(context,
+                        "Notifications enabled for " + module.getCode(),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Cancel notification
+                TimetableNotificationManager.cancelNotification(context, schedule);
+                Toast.makeText(context,
+                        "Notifications disabled for " + module.getCode(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         // Setting the content view
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();

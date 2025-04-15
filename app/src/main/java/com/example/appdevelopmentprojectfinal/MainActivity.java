@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.appdevelopmentprojectfinal.databinding.ActivityMainBinding;
 import com.example.appdevelopmentprojectfinal.timetable.TimetableFragment;
 import com.example.appdevelopmentprojectfinal.calendar.CalendarFragment;
+import com.example.appdevelopmentprojectfinal.timetable.TimetableNotificationManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        TimetableNotificationManager.createNotificationChannel(this);
+
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();

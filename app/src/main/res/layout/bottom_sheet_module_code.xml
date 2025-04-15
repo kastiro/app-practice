@@ -9,7 +9,7 @@
         android:id="@+id/module_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Module Code"
+        android:text="@string/module_code"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -17,46 +17,67 @@
         android:id="@+id/module_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Module Name"
+        android:text="@string/module_name"
         android:textSize="16sp" />
 
     <TextView
         android:id="@+id/module_lecturer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lecturer"
+        android:text="@string/lecturer"
         android:textSize="16sp" />
 
     <TextView
         android:id="@+id/module_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Location"
+        android:text="@string/location"
         android:textSize="16sp" />
     <TextView
         android:id="@+id/module_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Day"
+        android:text="@string/day"
         android:textSize="16sp" />
     <TextView
         android:id="@+id/module_start_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Time"
+        android:text="@string/start_time"
         android:textSize="16sp" />
     <TextView
         android:id="@+id/module_end_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="End Time"
+        android:text="@string/end_time"
         android:textSize="16sp" />
 
-    <Button
+    <!-- Button to hide module moved to module management -->
+    <View
         android:id="@+id/hide_show_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- Notification row -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hide Module" />
-    <!-- Add more details or buttons after this point -->
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/enable_notifications"
+            android:textSize="16sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/notification_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
 </LinearLayout>
