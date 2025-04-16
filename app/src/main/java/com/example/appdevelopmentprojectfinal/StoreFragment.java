@@ -1,6 +1,7 @@
 package com.example.appdevelopmentprojectfinal;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.appdevelopmentprojectfinal.marketplace.RecommendedCoursesFragment;
 import com.example.appdevelopmentprojectfinal.marketplace.TrendingCoursesFragment;
+import com.example.appdevelopmentprojectfinal.model.User;
 import com.example.appdevelopmentprojectfinal.utils.DataManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -37,9 +39,7 @@ public class StoreFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Arguments processing can be added here if needed in the future
-        
-        // Initialize data manager
-        DataManager.getInstance().initialize(requireContext());
+
     }
 
     @Override
@@ -52,6 +52,12 @@ public class StoreFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        //Removed local DataManager initialization so added below incase
+        User user = DataManager.getInstance().getCurrentUser();
+        if (user != null) {
+            Log.d(TAG, "User loaded: " + user.getFullName());
+        }
 
         // Initialize views
         tabLayout = view.findViewById(R.id.tabLayout);

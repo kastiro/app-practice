@@ -1,6 +1,5 @@
 {
-  "courses": [
-    {
+"CS4084-1":{
       "id": "CS4084-1",
       "name": "Android Programming Essentials",
       "relatedModule": "CS4084",
@@ -47,7 +46,7 @@
         "purchasesToday": 5
       }
     },
-    {
+"CS4084-2":{
       "id": "CS4084-2",
       "name": "Advanced UI Design for Android",
       "relatedModule": "CS4084",
@@ -94,7 +93,7 @@
         "purchasesToday": 3
       }
     },
-    {
+  "CS4106-1":{
       "id": "CS4106-1",
       "name": "Python for Machine Learning",
       "relatedModule": "CS4106",
@@ -141,7 +140,7 @@
         "purchasesToday": 7
       }
     },
-    {
+  "CS4116-1":{
       "id": "CS4116-1",
       "name": "Agile Development Workflow",
       "relatedModule": "CS4116",
@@ -188,7 +187,7 @@
         "purchasesToday": 4
       }
     },
-    {
+  "CS4187-1":{
       "id": "CS4187-1",
       "name": "Ethics in Computing",
       "relatedModule": "CS4187",
@@ -235,7 +234,7 @@
         "purchasesToday": 2
       }
     },
-    {
+  "CS4457-1":{
       "id": "CS4457-1",
       "name": "Project Management Fundamentals",
       "relatedModule": "CS4457",
@@ -284,7 +283,7 @@
         "purchasesToday": 4
       }
     },
-    {
+  "CS4457-2":{
       "id": "CS4457-2",
       "name": "Risk Management in Software Projects",
       "relatedModule": "CS4457",
@@ -331,7 +330,7 @@
         "purchasesToday": 3
       }
     },
-    {
+  "ET4162-1":{
       "id": "ET4162-1",
       "name": "IoT Device Programming",
       "relatedModule": "ET4162",
@@ -378,5 +377,4 @@
         "purchasesToday": 2
       }
     }
-  ]
 }
