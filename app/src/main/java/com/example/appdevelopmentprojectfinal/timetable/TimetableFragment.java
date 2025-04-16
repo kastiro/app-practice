@@ -35,6 +35,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import androidx.appcompat.widget.SwitchCompat;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 public class TimetableFragment extends Fragment implements ModuleManagementAdapter.OnModuleVisibilityChangedListener {
     private static final String TIMETABLE_FILENAME = "timetable.json";
 
@@ -135,7 +142,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 }
             }
         }
-            // Populate the map with module schedules
+        // Populate the map with module schedules
         for (ModuleSchedule schedule : moduleSchedules) {
             TimeSlot slot = schedule.getTimeSlot();
             String day = slot.getDay();
@@ -293,63 +300,109 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         bottomSheetDialog.show();
     }
 
+    //Updated Firebase Version
     private void loadTimetableData() {
-        try {
-            String jsonString = loadJSONFromAsset();
-            if (jsonString == null) {
-                Log.e("TimetableFragment", "Failed to load timetable JSON");
-                Toast.makeText(requireContext(), "Failed to load timetable data", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            JSONObject jsonObject = new JSONObject(jsonString);
-            JSONArray modulesArray = jsonObject.getJSONArray("modules");
-            moduleSchedules.clear();
-            for (int i = 0; i < modulesArray.length(); i++) {
-                JSONObject moduleObj = modulesArray.getJSONObject(i);
-                Module module = new Module(
-                        moduleObj.getString("code"),
-                        moduleObj.getString("name"),
-                        moduleObj.getString("lecturer")
-                );
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://appdevelopmentprojectfinal-default-rtdb.europe-west1.firebasedatabase.app");
+        DatabaseReference ref = database.getReference("timetable/modules");
 
-                JSONArray slotsArray = moduleObj.getJSONArray("slots");
-                for (int j = 0; j < slotsArray.length(); j++) {
-                    JSONObject slotObj = slotsArray.getJSONObject(j);
-                    TimeSlot timeSlot = new TimeSlot(
-                            slotObj.getString("day"),
-                            slotObj.getString("startTime"),
-                            slotObj.getString("endTime"),
-                            slotObj.getString("location")
-                    );
+        moduleSchedules.clear();
 
-                    boolean isMovable = slotObj.getBoolean("isMovable");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot moduleSnap : snapshot.getChildren()) {
+                    String code = moduleSnap.child("code").getValue(String.class);
+                    String name = moduleSnap.child("name").getValue(String.class);
+                    String lecturer = moduleSnap.child("lecturer").getValue(String.class);
+                    Module module = new Module(code, name, lecturer);
 
-                    moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
+                    for (DataSnapshot slotSnap : moduleSnap.child("slots").getChildren()) {
+                        String day = slotSnap.child("day").getValue(String.class);
+                        String startTime = slotSnap.child("startTime").getValue(String.class);
+                        String endTime = slotSnap.child("endTime").getValue(String.class);
+                        String location = slotSnap.child("location").getValue(String.class);
+                        boolean isMovable = Boolean.TRUE.equals(slotSnap.child("isMovable").getValue(Boolean.class));
+
+                        TimeSlot timeSlot = new TimeSlot(day, startTime, endTime, location);
+                        ModuleSchedule schedule = new ModuleSchedule(module, timeSlot, isMovable);
+                        moduleSchedules.add(schedule);
+                    }
                 }
+
+                Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " schedules from Firebase");
+
+                // Now that we’ve got data, update UI
+                moduleAdapter = new ModuleManagementAdapter(moduleSchedules, TimetableFragment.this);
+                moduleListView.setAdapter(moduleAdapter);
+                displayTimetable();
             }
 
-            Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " module schedules");
-
-        } catch (JSONException e) {
-            Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
-            Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private String loadJSONFromAsset() {
-        try {
-            InputStream inputStream = requireActivity().getAssets().open(TIMETABLE_FILENAME);
-            int size = inputStream.available();
-            byte[] buffer = new byte[size];
-            int bytesRead = inputStream.read(buffer);
-            inputStream.close();
-            if (bytesRead != size) {
-                Log.e("TimetableFragment", "Failed to read entire file. Expected: " + size + ", Read: " + bytesRead);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("TimetableFragment", "Failed to load timetable: " + error.getMessage());
+                Toast.makeText(requireContext(), "Error loading timetable", Toast.LENGTH_SHORT).show();
             }
-            return new String(buffer, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            Log.e("TimetableFragment", "Error loading JSON: " + e.getMessage());
-            return null;
-        }
+        });
     }
 }
+
+/* Old JSON methods for reference:
+private String loadJSONFromAsset() {
+    try {
+        InputStream inputStream = requireActivity().getAssets().open(TIMETABLE_FILENAME);
+        int size = inputStream.available();
+        byte[] buffer = new byte[size];
+        int bytesRead = inputStream.read(buffer);
+        inputStream.close();
+        if (bytesRead != size) {
+            Log.e("TimetableFragment", "Failed to read entire file. Expected: " + size + ", Read: " + bytesRead);
+        }
+        return new String(buffer, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+        Log.e("TimetableFragment", "Error loading JSON: " + e.getMessage());
+        return null;
+    }
+
+    private void loadTimetableDataFromAsset() {
+    try {
+        String jsonString = loadJSONFromAsset();
+        if (jsonString == null) {
+            Log.e("TimetableFragment", "Failed to load timetable JSON");
+            Toast.makeText(requireContext(), "Failed to load timetable data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        JSONObject jsonObject = new JSONObject(jsonString);
+        JSONArray modulesArray = jsonObject.getJSONArray("modules");
+        moduleSchedules.clear();
+        for (int i = 0; i < modulesArray.length(); i++) {
+            JSONObject moduleObj = modulesArray.getJSONObject(i);
+            Module module = new Module(
+                    moduleObj.getString("code"),
+                    moduleObj.getString("name"),
+                    moduleObj.getString("lecturer")
+            );
+
+            JSONArray slotsArray = moduleObj.getJSONArray("slots");
+            for (int j = 0; j < slotsArray.length(); j++) {
+                JSONObject slotObj = slotsArray.getJSONObject(j);
+                TimeSlot timeSlot = new TimeSlot(
+                        slotObj.getString("day"),
+                        slotObj.getString("startTime"),
+                        slotObj.getString("endTime"),
+                        slotObj.getString("location")
+                );
+
+                boolean isMovable = slotObj.getBoolean("isMovable");
+
+                moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
+            }
+        }
+
+        Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " module schedules from asset");
+
+    } catch (JSONException e) {
+        Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
+        Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
+    }
+}
+*/

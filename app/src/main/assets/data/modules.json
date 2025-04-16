@@ -1,6 +1,5 @@
 {
-  "modules": [
-    {
+  "CS4084": {
       "code": "CS4084",
       "name": "MOBILE APPLICATION DEVELOPMENT",
       "year": 3,
@@ -8,7 +7,7 @@
       "domain": "Faculty of Science and Engineering",
       "department": "Computer Science & Information Systems"
     },
-    {
+  "CS4106":{
       "code": "CS4106",
       "name": "MACHINE LEARNING",
       "year": 3,
@@ -16,7 +15,7 @@
       "domain": "Faculty of Science and Engineering",
       "department": "Computer Science & Information Systems"
     },
-    {
+  "CS4116":{
       "code": "CS4116",
       "name": "SOFTWARE DEVELOPMENT PROJECT",
       "year": 3,
@@ -24,7 +23,7 @@
       "domain": "Faculty of Science and Engineering",
       "department": "Computer Science & Information Systems"
     },
-    {
+  "CS4187":{
       "code": "CS4187",
       "name": "PROFESSIONAL ISSUES IN COMPUTING",
       "year": 3,
@@ -32,7 +31,7 @@
       "domain": "Faculty of Science and Engineering",
       "department": "Computer Science & Information Systems"
     },
-    {
+  "CS4457":{
       "code": "CS4457",
       "name": "PROJECT MANAGEMENT AND PRACTICE",
       "year": 3,
@@ -40,7 +39,7 @@
       "domain": "Faculty of Science and Engineering",
       "department": "Computer Science & Information Systems"
     },
-    {
+  "MS4034":{
       "code": "MS4034",
       "name": "BUSINESS DATA COMMUNICATIONS",
       "year": 3,
@@ -48,7 +47,7 @@
       "domain": "Faculty of Business",
       "department": "Management and Marketing"
     },
-    {
+  "ET4162":{
       "code": "ET4162",
       "name": "INTERNET OF THINGS",
       "year": 3,
@@ -56,5 +55,4 @@
       "domain": "Faculty of Science and Engineering",
       "department": "Electronic & Computer Engineering"
     }
-  ]
 }
