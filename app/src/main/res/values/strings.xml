@@ -62,4 +62,6 @@
     <string name="images">images</string>
     <string name="and">and</string>
     <string name="preview_tap_to_see">Tap to see preview content</string>
+
+    <string name="add_module">Add Module</string>
 </resources>

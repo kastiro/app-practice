@@ -2,9 +2,11 @@ package com.example.appdevelopmentprojectfinal.timetable;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -116,6 +118,7 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             moduleMap.get(moduleCode).addSchedule(schedule);
         }
 
+        Log.i("TAG", moduleMap.values().toString());
         // Add all module groups to the list
         moduleGroups.addAll(moduleMap.values());
     }
@@ -156,6 +159,21 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             // Update show status in JSON file
             jsonUtil.updateShowStatusAndSave(tempContext, module.getCode(), isChecked);
         });
+
+        // Add scroll button listeners
+        holder.btnScrollUp.setOnClickListener(v -> {
+            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
+            if (recyclerView != null) {
+                recyclerView.smoothScrollBy(0, -200); // Scroll up by 200px
+            }
+        });
+
+        holder.btnScrollDown.setOnClickListener(v -> {
+            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
+            if (recyclerView != null) {
+                recyclerView.smoothScrollBy(0, 200); // Scroll down by 200px
+            }
+        });
     }
 
     @Override
@@ -170,6 +188,9 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         Switch visibilityToggle;
         CardView cardView;
 
+        ImageButton btnScrollUp;
+        ImageButton btnScrollDown;
+
         public ModuleViewHolder(@NonNull View itemView) {
             super(itemView);
             moduleTitle = itemView.findViewById(R.id.module_title);
@@ -177,6 +198,10 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             moduleSchedule = itemView.findViewById(R.id.module_schedule);
             visibilityToggle = itemView.findViewById(R.id.visibility_toggle);
             cardView = (CardView) itemView;
+
+            // Add these lines to initialize the buttons
+            btnScrollUp = itemView.findViewById(R.id.btn_scroll_up);
+            btnScrollDown = itemView.findViewById(R.id.btn_scroll_down);
         }
     }
 }

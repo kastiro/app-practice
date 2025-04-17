@@ -10,45 +10,74 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="12dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/module_title"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="CS4084: Mobile Application Development"
-                android:textStyle="bold"
-                android:textSize="16sp"/>
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/module_lecturer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Dr. Smith"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
+                <TextView
+                    android:id="@+id/module_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="CS4084: Mobile Application Development"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/module_schedule"
-                android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/module_lecturer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Dr. Smith"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/module_schedule"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Monday 09:00-11:00 (CSG-001)"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/visibility_toggle"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Monday 09:00-11:00 (CSG-001)"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
+                android:layout_gravity="center_vertical"
+                android:checked="true" />
         </LinearLayout>
 
-        <Switch
-            android:id="@+id/visibility_toggle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:checked="true"/>
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btn_scroll_up"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/arrow_up_float" />
+
+            <ImageButton
+                android:id="@+id/btn_scroll_down"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/arrow_down_float" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

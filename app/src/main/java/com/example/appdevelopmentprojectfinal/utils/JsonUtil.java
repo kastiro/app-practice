@@ -4,8 +4,10 @@ import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -80,6 +82,44 @@ public class JsonUtil {
             fos.write(content.getBytes());
             fos.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void appendModuleToFile(Context context, JSONObject newModule) {
+        try {
+            File file = new File(context.getFilesDir(), internalFileName);
+            JSONObject jsonData;
+
+            // Step 1: Read existing JSON
+            if (file.exists()) {
+                FileInputStream fis = new FileInputStream(file);
+                StringBuilder sb = new StringBuilder();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                fis.close();
+                jsonData = new JSONObject(sb.toString());
+            } else {
+                // If file doesn't exist, initialize the structure
+                jsonData = new JSONObject();
+                jsonData.put("modules", new JSONArray());
+            }
+
+            // Step 2: Append new module
+            JSONArray modulesArray = jsonData.getJSONArray("modules");
+            modulesArray.put(newModule);
+
+            // Step 3: Write back to file
+            FileOutputStream fos = new FileOutputStream(file, false); // overwrite with updated content
+            fos.write(jsonData.toString(4).getBytes()); // pretty-print with indent
+            fos.close();
+
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }

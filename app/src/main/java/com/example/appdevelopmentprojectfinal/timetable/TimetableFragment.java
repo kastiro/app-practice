@@ -6,6 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -13,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,6 +47,9 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
     private TextView emptyView;
     private RecyclerView moduleListView;
     private ModuleManagementAdapter moduleAdapter;
+
+    private Button addModuleButton;
+    LinearLayout linearLayoutSlots;
 
     // Define time slots for the timetable
     private static final String[] TIME_SLOTS = {
@@ -84,6 +93,114 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         emptyView = view.findViewById(R.id.empty_view);
         moduleListView = view.findViewById(R.id.module_list);
 
+        addModuleButton = view.findViewById(R.id.add_module_button);
+        addModuleButton.setOnClickListener(v -> {
+            // Inflate custom dialog layout
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            View dialogView = inflater.inflate(R.layout.dialog_add_module, null);
+
+            linearLayoutSlots = dialogView.findViewById(R.id.linear_layout_slots);
+
+            EditText codeInput = dialogView.findViewById(R.id.input_code);
+            EditText nameInput = dialogView.findViewById(R.id.input_name);
+            EditText lecturerInput = dialogView.findViewById(R.id.input_lecturer);
+            EditText typeInput = dialogView.findViewById(R.id.input_type);
+            Button confirmButton = dialogView.findViewById(R.id.btn_add_module);
+
+            AlertDialog dialog = new AlertDialog.Builder(getContext())
+                    .setView(dialogView)
+                    .create();
+
+            dialog.show();
+
+            Button btnAddAnotherSlot = dialogView.findViewById(R.id.btn_add_slot);
+            btnAddAnotherSlot.setOnClickListener(innerView -> {
+                // Create new slot section dynamically
+
+                // Create new LinearLayout for each slot
+                LinearLayout newSlotLayout = new LinearLayout(requireContext());
+                newSlotLayout.setOrientation(LinearLayout.VERTICAL);
+
+                // Create and add EditText for day
+                EditText inputDay = new EditText(requireContext());
+                inputDay.setHint("Day (e.g., Monday)");
+                newSlotLayout.addView(inputDay);
+
+                // Create and add EditText for start time
+                EditText inputStartTime = new EditText(requireContext());
+                inputStartTime.setHint("Start Time (e.g., 09:00 AM)");
+                newSlotLayout.addView(inputStartTime);
+
+                // Create and add EditText for end time
+                EditText inputEndTime = new EditText(requireContext());
+                inputEndTime.setHint("End Time (e.g., 10:00 AM)");
+                newSlotLayout.addView(inputEndTime);
+
+                // Create and add EditText for location
+                EditText inputLocation = new EditText(requireContext());
+                inputLocation.setHint("Location");
+                newSlotLayout.addView(inputLocation);
+
+                // Create and add RadioGroup for isMovable
+                TextView textIsMovable = new TextView(requireContext());
+                textIsMovable.setText("Is the Slot Movable?");
+                newSlotLayout.addView(textIsMovable);
+
+                RadioGroup radioGroupIsMovable = new RadioGroup(requireContext());
+                radioGroupIsMovable.setOrientation(LinearLayout.HORIZONTAL);
+
+                RadioButton radioYes = new RadioButton(requireContext());
+                radioYes.setText("Yes");
+                radioGroupIsMovable.addView(radioYes);
+
+                RadioButton radioNo = new RadioButton(requireContext());
+                radioNo.setText("No");
+                radioGroupIsMovable.addView(radioNo);
+
+                newSlotLayout.addView(radioGroupIsMovable);
+
+                // Add the new slot layout to the parent LinearLayout
+                linearLayoutSlots.addView(newSlotLayout);
+            });
+
+            confirmButton.setOnClickListener(confirmView -> {
+                String code = codeInput.getText().toString();
+                String name = nameInput.getText().toString();
+                String lecturer = lecturerInput.getText().toString();
+                String type = typeInput.getText().toString();
+
+                Log.i("TAG", linearLayoutSlots.toString());
+
+                List<TimeSlot> timeSlotList = new ArrayList<>();
+                int childCount = linearLayoutSlots.getChildCount();
+                // Iterate through each child view within the LinearLayout
+                for (int i = 0; i < childCount; i++) {
+                    View childView = linearLayoutSlots.getChildAt(i);
+
+                    // Assuming each child is a LinearLayout containing input fields
+                    if (childView instanceof LinearLayout) {
+                        LinearLayout slotLayout = (LinearLayout) childView;
+                        TimeSlot timeSlot = readSlotLayout(slotLayout);
+                        timeSlotList.add(timeSlot);
+                    } else {
+                        Log.w("TimetableFragment", "Unexpected child type at position " + i + ": " + childView.getClass().getSimpleName());
+                    }
+                }
+
+
+                Module module = new Module(code, name, lecturer, true);
+                module.setType(type);
+                module.setTimeSlotList(timeSlotList);
+
+                try {
+                    addModule(module); // your method to handle logic
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                dialog.dismiss();
+            });
+        });
+
         // Setup RecyclerView for module management
         moduleListView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -96,6 +213,56 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
 
         // Display the timetable
         displayTimetable();
+    }
+
+    private TimeSlot readSlotLayout(LinearLayout slotLayout) {
+        String day = "";
+        String startTime = "";
+        String endTime = "";
+        String location = "";
+        boolean isMovable = false;
+
+        // Iterate through the children of the slot layout (EditText, RadioGroup)
+        for (int j = 0; j < slotLayout.getChildCount(); j++) {
+            View inputView = slotLayout.getChildAt(j);
+
+            if (inputView instanceof EditText) {
+                EditText editText = (EditText) inputView;
+                String hint = editText.getHint() != null ? editText.getHint().toString() : "";
+                String text = editText.getText().toString();
+
+                if (hint.contains("Day")) {
+                    day = text;
+                } else if (hint.contains("Start Time")) {
+                    startTime = text;
+                } else if (hint.contains("End Time")) {
+                    endTime = text;
+                } else if (hint.contains("Location")) {
+                    location = text;
+                }
+            } else if (inputView instanceof RadioGroup) {
+                RadioGroup radioGroup = (RadioGroup) inputView;
+                int checkedId = radioGroup.getCheckedRadioButtonId();
+
+                if (checkedId != -1) { // Check if a button is selected
+                    RadioButton selectedRadioButton = radioGroup.findViewById(checkedId);
+                    if (selectedRadioButton != null) {
+                        isMovable = selectedRadioButton.getText().toString().equalsIgnoreCase("Yes");
+                    }
+                }
+            }
+        }
+
+        // Process the extracted slot data (e.g., print to log)
+        Log.d("TimetableFragment", "Slot: Day=" + day + ", Start=" + startTime + ", End=" + endTime + ", Loc=" + location + ", Movable=" + isMovable);
+        // Here you might add logic to store this information to ModuleSchedule Object
+        return new TimeSlot(day, startTime, endTime, location);
+    }
+
+    private void addModule(Module module) throws JSONException {
+        Log.d("ModuleEntry", module.toString());
+        JsonUtil jsonUtil = new JsonUtil();
+        jsonUtil.appendModuleToFile(requireContext(), new JSONObject(module.toString()));
     }
 
     @Override
@@ -303,6 +470,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                         moduleObj.getString("lecturer"),
                         Boolean.parseBoolean(moduleObj.getString("show"))
                 );
+                module.setType(moduleObj.getString("type"));
 
                 // Process current slots
                 JSONArray slotsArray = moduleObj.getJSONArray("slots");
@@ -318,6 +486,8 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     );
 
                     boolean isMovable = slotObj.getBoolean("isMovable");
+                    module.getTimeSlotList().add(timeSlot);
+                    Log.d("ModuleEntry", module.toString());
 
                     moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable, module.isShow()));
                 }
@@ -328,6 +498,11 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         } catch (JSONException e) {
             Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
             Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
+
+            Log.i("TimetableFragment", "Trying to copy file to internal storage...");
+            JsonUtil jsonUtil = new JsonUtil();
+            jsonUtil.copyFileFromAssetsToInternalStorage(requireContext(), TIMETABLE_FILENAME);
+            loadTimetableData();
         }
     }
 

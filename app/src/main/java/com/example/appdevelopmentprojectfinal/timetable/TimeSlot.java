@@ -20,10 +20,15 @@ public class TimeSlot {
     public String getStartTime() { return startTime; }
     public String getEndTime() { return endTime; }
     public String getLocation() { return location; }
-    
-    @NonNull
+
     @Override
     public String toString() {
-        return day + " " + startTime + "-" + endTime + " at " + location;
+        return "{" +
+                "\"day\":\"" + day + "\"," +
+                "\"startTime\":\"" + startTime + "\"," +
+                "\"endTime\":\"" + endTime + "\"," +
+                "\"location\":\"" + location + "\"," +
+                "\"isMovable\":" + true +
+                "}";
     }
 }
