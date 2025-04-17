@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="alt_slot_day" type="id" />
-    <item name="alt_slot_start" type="id" />
-    <item name="alt_slot_end" type="id" />
-    <item name="alt_slot_location" type="id" />
-    <item name="radio_group_movable" type="id" />
-</resources>
