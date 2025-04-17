@@ -1,13 +1,16 @@
 package com.example.appdevelopmentprojectfinal.timetable;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Switch;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -15,32 +18,26 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.appdevelopmentprojectfinal.R;
+import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import androidx.appcompat.widget.SwitchCompat;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import android.content.Context;
 
 public class TimetableFragment extends Fragment implements ModuleManagementAdapter.OnModuleVisibilityChangedListener {
     private static final String TIMETABLE_FILENAME = "timetable.json";
@@ -50,6 +47,9 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
     private TextView emptyView;
     private RecyclerView moduleListView;
     private ModuleManagementAdapter moduleAdapter;
+
+    private Button addModuleButton;
+    LinearLayout linearLayoutSlots;
 
     // Define time slots for the timetable
     private static final String[] TIME_SLOTS = {
@@ -93,6 +93,217 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         emptyView = view.findViewById(R.id.empty_view);
         moduleListView = view.findViewById(R.id.module_list);
 
+        addModuleButton = view.findViewById(R.id.add_module_button);
+        addModuleButton.setOnClickListener(v -> {
+            // Inflate custom dialog layout
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            View dialogView = inflater.inflate(R.layout.dialog_add_module, null);
+
+            linearLayoutSlots = dialogView.findViewById(R.id.linear_layout_slots);
+
+            EditText codeInput = dialogView.findViewById(R.id.input_code);
+            EditText nameInput = dialogView.findViewById(R.id.input_name);
+            EditText lecturerInput = dialogView.findViewById(R.id.input_lecturer);
+            EditText typeInput = dialogView.findViewById(R.id.input_type);
+            Button confirmButton = dialogView.findViewById(R.id.btn_add_module);
+
+            AlertDialog dialog = new AlertDialog.Builder(getContext())
+                    .setView(dialogView)
+                    .create();
+
+            dialog.show();
+
+            Button btnAddAnotherSlot = dialogView.findViewById(R.id.btn_add_slot);
+            btnAddAnotherSlot.setOnClickListener(innerView -> {
+                // Create new slot section dynamically
+
+                // Create new LinearLayout for each slot
+                LinearLayout newSlotLayout = new LinearLayout(requireContext());
+                newSlotLayout.setOrientation(LinearLayout.VERTICAL);
+                newSlotLayout.setTag("mainSlotLayout");
+
+                // Create a parent container for each complete slot
+                LinearLayout slotContainer = new LinearLayout(requireContext());
+                slotContainer.setOrientation(LinearLayout.VERTICAL);
+                slotContainer.setTag("slotContainer"); // Add tag to identify slot containers
+
+                // Create and add EditText for day
+                EditText inputDay = new EditText(requireContext());
+                inputDay.setHint("Day (e.g., Monday)");
+                newSlotLayout.addView(inputDay);
+
+                // Create and add EditText for start time
+                EditText inputStartTime = new EditText(requireContext());
+                inputStartTime.setHint("Start Time (e.g., 09:00 AM)");
+                newSlotLayout.addView(inputStartTime);
+
+                // Create and add EditText for end time
+                EditText inputEndTime = new EditText(requireContext());
+                inputEndTime.setHint("End Time (e.g., 10:00 AM)");
+                newSlotLayout.addView(inputEndTime);
+
+                // Create and add EditText for location
+                EditText inputLocation = new EditText(requireContext());
+                inputLocation.setHint("Location");
+                newSlotLayout.addView(inputLocation);
+
+                // Create and add RadioGroup for isMovable
+                TextView textIsMovable = new TextView(requireContext());
+                textIsMovable.setText("Is the Slot Movable?");
+                newSlotLayout.addView(textIsMovable);
+
+                RadioGroup radioGroupIsMovable = new RadioGroup(requireContext());
+                radioGroupIsMovable.setOrientation(LinearLayout.HORIZONTAL);
+
+                RadioButton radioYes = new RadioButton(requireContext());
+                radioYes.setText("Yes");
+                radioGroupIsMovable.addView(radioYes);
+
+                RadioButton radioNo = new RadioButton(requireContext());
+                radioNo.setText("No");
+                radioGroupIsMovable.addView(radioNo);
+
+                newSlotLayout.addView(radioGroupIsMovable);
+
+                // Container for alternative slots (initially empty)
+                LinearLayout alternativeSlotsContainer = new LinearLayout(requireContext());
+                alternativeSlotsContainer.setOrientation(LinearLayout.VERTICAL);
+                alternativeSlotsContainer.setTag("alternativeSlotsContainer");
+                newSlotLayout.addView(alternativeSlotsContainer);
+
+                // Button to add alternative slot (initially hidden)
+                Button btnAddAlternativeSlot = new Button(requireContext());
+                btnAddAlternativeSlot.setText("Add Alternative Time Slot");
+                btnAddAlternativeSlot.setVisibility(View.GONE);
+                newSlotLayout.addView(btnAddAlternativeSlot);
+
+                // RadioGroup listener to show/hide alternative slots option
+                radioGroupIsMovable.setOnCheckedChangeListener((group, checkedId) -> {
+                    if (checkedId == radioYes.getId()) {
+                        btnAddAlternativeSlot.setVisibility(View.VISIBLE);
+                    } else {
+                        btnAddAlternativeSlot.setVisibility(View.GONE);
+                        // Remove all alternative slots when switching to "No"
+                        alternativeSlotsContainer.removeAllViews();
+                    }
+                });
+
+                // Button to add alternative slot
+                btnAddAlternativeSlot.setOnClickListener(view_alternate -> {
+                    // Create alternative slot layout (similar to main slot but without movable option)
+                    LinearLayout altSlotLayout = new LinearLayout(requireContext());
+                    altSlotLayout.setOrientation(LinearLayout.VERTICAL);
+                    altSlotLayout.setTag("alternativeSlot");
+
+                    // Add divider
+                    View divider = new View(requireContext());
+                    divider.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            1
+                    ));
+                    divider.setBackgroundColor(Color.GRAY);
+                    altSlotLayout.addView(divider);
+
+                    // Add title
+                    TextView altTitle = new TextView(requireContext());
+                    altTitle.setText("Alternative Time Slot");
+                    altSlotLayout.addView(altTitle);
+
+                    // Add day input
+                    EditText altInputDay = new EditText(requireContext());
+                    altInputDay.setHint("Day (e.g., Tuesday)");
+                    altSlotLayout.addView(altInputDay);
+
+                    // Add start time input
+                    EditText altInputStartTime = new EditText(requireContext());
+                    altInputStartTime.setHint("Start Time (e.g., 02:00 PM)");
+                    altSlotLayout.addView(altInputStartTime);
+
+                    // Add end time input
+                    EditText altInputEndTime = new EditText(requireContext());
+                    altInputEndTime.setHint("End Time (e.g., 03:00 PM)");
+                    altSlotLayout.addView(altInputEndTime);
+
+                    // Add location input
+                    EditText altInputLocation = new EditText(requireContext());
+                    altInputLocation.setHint("Location");
+                    altSlotLayout.addView(altInputLocation);
+
+                    // Add remove button for this alternative slot
+                    Button btnRemoveAltSlot = new Button(requireContext());
+                    btnRemoveAltSlot.setText("Remove This Alternative Slot");
+                    btnRemoveAltSlot.setOnClickListener(removeView -> {
+                        alternativeSlotsContainer.removeView(altSlotLayout);
+                    });
+                    altSlotLayout.addView(btnRemoveAltSlot);
+
+                    // Add the alternative slot to the container
+                    alternativeSlotsContainer.addView(altSlotLayout);
+                });
+
+                slotContainer.addView(newSlotLayout);
+                // Add the new slot layout to the parent LinearLayout
+                linearLayoutSlots.addView(slotContainer);
+            });
+
+            confirmButton.setOnClickListener(confirmView -> {
+                String code = codeInput.getText().toString();
+                String name = nameInput.getText().toString();
+                String lecturer = lecturerInput.getText().toString();
+                String type = typeInput.getText().toString();
+
+                List<TimeSlot> timeSlotList = new ArrayList<>();
+                List<TimeSlot> alternativeSlotsList = new ArrayList<>();
+
+                int childCount = linearLayoutSlots.getChildCount();
+
+                // Iterate through each child view within the LinearLayout
+                for (int i = 0; i < childCount; i++) {
+                    View childView = linearLayoutSlots.getChildAt(i);
+
+                    // Only process views that are our slot containers
+                    if (childView instanceof LinearLayout && "slotContainer".equals(childView.getTag())) {
+                        LinearLayout slotContainer = (LinearLayout) childView;
+
+                        // Find the main slot layout within the container
+                        LinearLayout slotLayout = slotContainer.findViewWithTag("mainSlotLayout");
+                        if (slotLayout != null) {
+                            // Read the main time slot
+                            TimeSlot timeSlot = readSlotLayout(slotLayout);
+                            timeSlotList.add(timeSlot);
+
+                            // Find the alternative slots container in this layout
+                            LinearLayout alternativeSlotsContainer = slotLayout.findViewWithTag("alternativeSlotsContainer");
+                            if (alternativeSlotsContainer != null) {
+                                // Process all alternative slots
+                                int altChildCount = alternativeSlotsContainer.getChildCount();
+                                for (int j = 0; j < altChildCount; j++) {
+                                    View altChildView = alternativeSlotsContainer.getChildAt(j);
+                                    if (altChildView instanceof LinearLayout && "alternativeSlot".equals(altChildView.getTag())) {
+                                        TimeSlot altTimeSlot = readSlotLayout((LinearLayout) altChildView);
+                                        alternativeSlotsList.add(altTimeSlot);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Create and save the module
+                Module module = new Module(code, name, lecturer, true);
+                module.setType(type);
+                module.setTimeSlotList(timeSlotList);
+                module.setAlternativeSlots(alternativeSlotsList);
+
+                try {
+                    addModule(module);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                dialog.dismiss();
+            });
+        });
+
         // Setup RecyclerView for module management
         moduleListView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -107,17 +318,65 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         displayTimetable();
     }
 
-    // Callback for module visibility changes
+    private TimeSlot readSlotLayout(LinearLayout slotLayout) {
+        String day = "";
+        String startTime = "";
+        String endTime = "";
+        String location = "";
+        boolean isMovable = false;
+
+        // Iterate through the children of the slot layout (EditText, RadioGroup)
+        for (int j = 0; j < slotLayout.getChildCount(); j++) {
+            View inputView = slotLayout.getChildAt(j);
+
+            if (inputView instanceof EditText) {
+                EditText editText = (EditText) inputView;
+                String hint = editText.getHint() != null ? editText.getHint().toString() : "";
+                String text = editText.getText().toString();
+
+                if (hint.contains("Day")) {
+                    day = text;
+                } else if (hint.contains("Start Time")) {
+                    startTime = text;
+                } else if (hint.contains("End Time")) {
+                    endTime = text;
+                } else if (hint.contains("Location")) {
+                    location = text;
+                }
+            } else if (inputView instanceof RadioGroup) {
+                RadioGroup radioGroup = (RadioGroup) inputView;
+                int checkedId = radioGroup.getCheckedRadioButtonId();
+
+                if (checkedId != -1) { // Check if a button is selected
+                    RadioButton selectedRadioButton = radioGroup.findViewById(checkedId);
+                    if (selectedRadioButton != null) {
+                        isMovable = selectedRadioButton.getText().toString().equalsIgnoreCase("Yes");
+                    }
+                }
+            }
+        }
+
+        // Process the extracted slot data (e.g., print to log)
+        Log.d("TimetableFragment", "Slot: Day=" + day + ", Start=" + startTime + ", End=" + endTime + ", Loc=" + location + ", Movable=" + isMovable);
+        // Here you might add logic to store this information to ModuleSchedule Object
+        return new TimeSlot(day, startTime, endTime, location);
+    }
+
+    private void addModule(Module module) throws JSONException {
+        Log.d("ModuleEntry", module.toString());
+        JsonUtil jsonUtil = new JsonUtil();
+        jsonUtil.appendModuleToFile(requireContext(), new JSONObject(module.toString()));
+    }
+
     @Override
     public void onModuleVisibilityChanged() {
-        // Refresh the timetable when module visibility changed
+        // Refresh the timetable when module visibility changes
         timetableGrid.removeAllViews();
         displayTimetable();
     }
 
-
     private void displayTimetable() {
-        // Clear existing content to avoid duplication
+        // Clear existing content
         timetableGrid.removeAllViews();
 
         // if timetable is empty we make (a message notice) visible
@@ -132,7 +391,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         // Create a map to store modules by time and day
         Map<String, Map<String, List<ModuleSchedule>>> timetableMap = new HashMap<>();
 
-        // Gathering the time and day information (module)
+        // Gathering the time and day information (module information)
         for (String timeSlot : TIME_SLOTS) {
             timetableMap.put(timeSlot, new HashMap<>());
             for (String day : DAYS) {
@@ -142,16 +401,19 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 }
             }
         }
+
         // Populate the map with module schedules
         for (ModuleSchedule schedule : moduleSchedules) {
             TimeSlot slot = schedule.getTimeSlot();
             String day = slot.getDay();
             String startTime = slot.getStartTime();
             String endTime = slot.getEndTime();
+
             // Find all time slots that this module spans
             for (String timeSlot : TIME_SLOTS) {
                 String[] times = timeSlot.split("-");
                 String slotStart = times[0];
+
                 // If this time slot is within the module's time range
                 if (isTimeInRange(slotStart, startTime, endTime)) {
                     Map<String, List<ModuleSchedule>> dayMap = timetableMap.get(timeSlot);
@@ -165,18 +427,19 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
             }
         }
 
-
         // Create the timetable rows
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         for (String timeSlot : TIME_SLOTS) {
             TableRow row = new TableRow(getContext());
+
             // Add time label
             TextView timeLabel = new TextView(getContext());
             timeLabel.setText(timeSlot);
             timeLabel.setPadding(8, 8, 8, 8);
             timeLabel.setWidth(250);
             row.addView(timeLabel);
+
             // Add cells for each day
             for (String day : DAYS) {
                 List<ModuleSchedule> schedulesForSlot = new ArrayList<>();
@@ -184,7 +447,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 if (dayMap != null) {
                     List<ModuleSchedule> slots = dayMap.get(day);
                     if (slots != null) {
-                        // Filter out hidden that are currently hidden (upgradable)
+                        // Filter out hidden modules
                         for (ModuleSchedule slot : slots) {
                             if (slot.isVisible()) {
                                 schedulesForSlot.add(slot);
@@ -207,10 +470,10 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     ModuleSchedule schedule = schedulesForSlot.get(0); // Just take the first one if multiple
                     Module module = schedule.getModule();
 
-                    // Inflate  module item layout
+                    // Inflate the module item layout
                     View moduleView = inflater.inflate(R.layout.item_timetable_module, null);
 
-                    // Setting module details
+                    // Set module details
                     TextView codeText = moduleView.findViewById(R.id.module_code);
                     TextView nameText = moduleView.findViewById(R.id.module_name);
                     TextView locationText = moduleView.findViewById(R.id.module_location);
@@ -219,16 +482,17 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     nameText.setText(module.getName());
                     locationText.setText(schedule.getTimeSlot().getLocation());
 
-                    // Sets a background color based on module code
+                    // Sets a background color based on the module code
                     CardView cardView = (CardView) moduleView;
                     int colorIndex = Math.abs(module.getCode().hashCode()) % MODULE_COLORS.length;
                     cardView.setCardBackgroundColor(MODULE_COLORS[colorIndex]);
 
+                    // Sets layout parameters
                     TableRow.LayoutParams params = new TableRow.LayoutParams(120, 150);
                     params.setMargins(2, 2, 2, 2);
                     moduleView.setLayoutParams(params);
 
-                    // click listener for module details
+                    // Adds a click listener for showing module details
                     moduleView.setOnClickListener(v -> handleModuleClick(schedule));
 
                     row.addView(moduleView);
@@ -240,12 +504,15 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
     }
 
     private boolean isTimeInRange(String timeToCheck, String startTime, String endTime) {
+        // Simple string comparison for HH:MM format
         // Assumes all times are in 24-hour format
         return timeToCheck.compareTo(startTime) >= 0 && timeToCheck.compareTo(endTime) < 0;
     }
 
     private void handleModuleClick(ModuleSchedule schedule) {
+        // Create and show bottom sheet
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+
         // Inflates layout for the bottom sheet
         View bottomSheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_module_code, null);
 
@@ -257,13 +524,12 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         TextView moduleDay = bottomSheetView.findViewById(R.id.module_day);
         TextView moduleStartTime = bottomSheetView.findViewById(R.id.module_start_time);
         TextView moduleEndTime = bottomSheetView.findViewById(R.id.module_end_time);
-        androidx.appcompat.widget.SwitchCompat notificationToggle = bottomSheetView.findViewById(R.id.notification_toggle);
 
-        // Canceled hideShow button from inside the bottom sheet (when pressing on modules)
-        // View hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
-        // hideShowButton.setVisibility(View.GONE);
+        // Remove the hide/show button as we now handle this in the module management section
+        View hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
+        hideShowButton.setVisibility(View.GONE);
 
-        // Setting details in the bottom sheet
+        // Setting module details in the bottom sheet
         Module module = schedule.getModule();
         TimeSlot timeSlot = schedule.getTimeSlot();
         moduleCode.setText(module.getCode());
@@ -274,135 +540,95 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         moduleStartTime.setText(timeSlot.getStartTime());
         moduleEndTime.setText(timeSlot.getEndTime());
 
-        notificationToggle.setChecked(schedule.isNotificationsEnabled());
-        // listener for the notification toggle
-        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            schedule.setNotificationsEnabled(isChecked);
-
-            Context context = requireContext();
-
-            if (isChecked) {
-                // Schedule notification
-                TimetableNotificationManager.scheduleNotification(context, schedule);
-                Toast.makeText(context,
-                        "Notifications enabled for " + module.getCode(),
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                // Cancel notification
-                TimetableNotificationManager.cancelNotification(context, schedule);
-                Toast.makeText(context,
-                        "Notifications disabled for " + module.getCode(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-        // Setting the content view
+        // Setting the content view for the bottom sheet
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
     }
 
-    //Updated Firebase Version
     private void loadTimetableData() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://appdevelopmentprojectfinal-default-rtdb.europe-west1.firebasedatabase.app");
-        DatabaseReference ref = database.getReference("timetable/modules");
+        try {
+            // Reading the JSON file
+            String jsonString = loadJSONFromAsset();
+            if (jsonString == null) {
+                Log.e("TimetableFragment", "Failed to load timetable JSON");
+                Toast.makeText(requireContext(), "Failed to load timetable data", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        moduleSchedules.clear();
+            // Parse the JSON
+            JSONObject jsonObject = new JSONObject(jsonString);
+            JSONArray modulesArray = jsonObject.getJSONArray("modules");
 
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot moduleSnap : snapshot.getChildren()) {
-                    String code = moduleSnap.child("code").getValue(String.class);
-                    String name = moduleSnap.child("name").getValue(String.class);
-                    String lecturer = moduleSnap.child("lecturer").getValue(String.class);
-                    Module module = new Module(code, name, lecturer);
+            // Clear existing data
+            moduleSchedules.clear();
 
-                    for (DataSnapshot slotSnap : moduleSnap.child("slots").getChildren()) {
-                        String day = slotSnap.child("day").getValue(String.class);
-                        String startTime = slotSnap.child("startTime").getValue(String.class);
-                        String endTime = slotSnap.child("endTime").getValue(String.class);
-                        String location = slotSnap.child("location").getValue(String.class);
-                        boolean isMovable = Boolean.TRUE.equals(slotSnap.child("isMovable").getValue(Boolean.class));
+            // Process each module
+            for (int i = 0; i < modulesArray.length(); i++) {
+                JSONObject moduleObj = modulesArray.getJSONObject(i);
 
-                        TimeSlot timeSlot = new TimeSlot(day, startTime, endTime, location);
-                        ModuleSchedule schedule = new ModuleSchedule(module, timeSlot, isMovable);
-                        moduleSchedules.add(schedule);
-                    }
+                // Create module object
+                Module module = new Module(
+                        moduleObj.getString("code"),
+                        moduleObj.getString("name"),
+                        moduleObj.getString("lecturer"),
+                        Boolean.parseBoolean(moduleObj.getString("show"))
+                );
+                module.setType(moduleObj.getString("type"));
+
+                // Process alternative slots
+                JSONArray alternativeSlotsArray = moduleObj.getJSONArray("alternativeSlots");
+                for (int j = 0; j < alternativeSlotsArray.length(); j++) {
+                    JSONObject alternativeSlotsArrayJSONObject = alternativeSlotsArray.getJSONObject(j);
+
+                    // Create time slot
+                    TimeSlot alternativeTimeSlot = new TimeSlot(
+                            alternativeSlotsArrayJSONObject.getString("day"),
+                            alternativeSlotsArrayJSONObject.getString("startTime"),
+                            alternativeSlotsArrayJSONObject.getString("endTime"),
+                            alternativeSlotsArrayJSONObject.getString("location")
+                    );
+
+                    module.getAlternativeSlots().add(alternativeTimeSlot);
+                    Log.d("ModuleEntry", module.toString());
                 }
 
-                Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " schedules from Firebase");
+                // Process current slots
+                JSONArray slotsArray = moduleObj.getJSONArray("slots");
+                for (int j = 0; j < slotsArray.length(); j++) {
+                    JSONObject slotObj = slotsArray.getJSONObject(j);
 
-                // Now that we’ve got data, update UI
-                moduleAdapter = new ModuleManagementAdapter(moduleSchedules, TimetableFragment.this);
-                moduleListView.setAdapter(moduleAdapter);
-                displayTimetable();
+                    // Create time slot
+                    TimeSlot timeSlot = new TimeSlot(
+                            slotObj.getString("day"),
+                            slotObj.getString("startTime"),
+                            slotObj.getString("endTime"),
+                            slotObj.getString("location")
+                    );
+
+                    boolean isMovable = slotObj.getBoolean("isMovable");
+                    module.getTimeSlotList().add(timeSlot);
+                    Log.d("ModuleEntry", module.toString());
+
+                    moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable, module.isShow()));
+                }
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("TimetableFragment", "Failed to load timetable: " + error.getMessage());
-                Toast.makeText(requireContext(), "Error loading timetable", Toast.LENGTH_SHORT).show();
-            }
-        });
+            Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " module schedules");
+
+        } catch (JSONException e) {
+            Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
+            Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
+
+            Log.i("TimetableFragment", "Trying to copy file to internal storage...");
+            JsonUtil jsonUtil = new JsonUtil();
+            jsonUtil.copyFileFromAssetsToInternalStorage(requireContext(), TIMETABLE_FILENAME);
+            loadTimetableData();
+        }
+    }
+
+    private String loadJSONFromAsset() {
+            JsonUtil jsonUtil = new JsonUtil();
+            Context tempContext = requireContext();
+            return jsonUtil.readFileFromInternalStorage(tempContext);
     }
 }
-
-/* Old JSON methods for reference:
-private String loadJSONFromAsset() {
-    try {
-        InputStream inputStream = requireActivity().getAssets().open(TIMETABLE_FILENAME);
-        int size = inputStream.available();
-        byte[] buffer = new byte[size];
-        int bytesRead = inputStream.read(buffer);
-        inputStream.close();
-        if (bytesRead != size) {
-            Log.e("TimetableFragment", "Failed to read entire file. Expected: " + size + ", Read: " + bytesRead);
-        }
-        return new String(buffer, StandardCharsets.UTF_8);
-    } catch (IOException e) {
-        Log.e("TimetableFragment", "Error loading JSON: " + e.getMessage());
-        return null;
-    }
-
-    private void loadTimetableDataFromAsset() {
-    try {
-        String jsonString = loadJSONFromAsset();
-        if (jsonString == null) {
-            Log.e("TimetableFragment", "Failed to load timetable JSON");
-            Toast.makeText(requireContext(), "Failed to load timetable data", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        JSONObject jsonObject = new JSONObject(jsonString);
-        JSONArray modulesArray = jsonObject.getJSONArray("modules");
-        moduleSchedules.clear();
-        for (int i = 0; i < modulesArray.length(); i++) {
-            JSONObject moduleObj = modulesArray.getJSONObject(i);
-            Module module = new Module(
-                    moduleObj.getString("code"),
-                    moduleObj.getString("name"),
-                    moduleObj.getString("lecturer")
-            );
-
-            JSONArray slotsArray = moduleObj.getJSONArray("slots");
-            for (int j = 0; j < slotsArray.length(); j++) {
-                JSONObject slotObj = slotsArray.getJSONObject(j);
-                TimeSlot timeSlot = new TimeSlot(
-                        slotObj.getString("day"),
-                        slotObj.getString("startTime"),
-                        slotObj.getString("endTime"),
-                        slotObj.getString("location")
-                );
-
-                boolean isMovable = slotObj.getBoolean("isMovable");
-
-                moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable));
-            }
-        }
-
-        Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " module schedules from asset");
-
-    } catch (JSONException e) {
-        Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
-        Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
-    }
-}
-*/

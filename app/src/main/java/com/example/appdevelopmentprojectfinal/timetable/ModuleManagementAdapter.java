@@ -1,9 +1,12 @@
 package com.example.appdevelopmentprojectfinal.timetable;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -17,13 +20,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 
 public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManagementAdapter.ModuleViewHolder> {
 
-    //For grouping all schedules of  same module
+    // For grouping all schedules of the same module
     private final List<ModuleGroup> moduleGroups = new ArrayList<>();
     private final OnModuleVisibilityChangedListener listener;
 
+    // Colors for different modules
     private static final int[] MODULE_COLORS = {
             Color.parseColor("#FFCDD2"), // Light Red
             Color.parseColor("#C8E6C9"), // Light Green
@@ -49,7 +54,7 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
 
         public void addSchedule(ModuleSchedule schedule) {
             schedules.add(schedule);
-                if (!schedule.isVisible()) {
+            if (!schedule.isVisible()) {
                 allVisible = false;
             }
         }
@@ -73,7 +78,7 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             }
         }
 
-            // Prepare a string with all schedules of the module
+        // Prepare a string with all schedules of this module
         public String getSchedulesString() {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < schedules.size(); i++) {
@@ -105,16 +110,19 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         for (ModuleSchedule schedule : moduleSchedules) {
             Module module = schedule.getModule();
             String moduleCode = module.getCode();
+
             if (!moduleMap.containsKey(moduleCode)) {
                 moduleMap.put(moduleCode, new ModuleGroup(module));
             }
+
             moduleMap.get(moduleCode).addSchedule(schedule);
         }
 
-        //Add all module groups to the list
+        Log.i("TAG", moduleMap.values().toString());
+        // Add all module groups to the list
         moduleGroups.addAll(moduleMap.values());
     }
-    // With help of AI
+
     @NonNull
     @Override
     public ModuleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -128,22 +136,43 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         ModuleGroup moduleGroup = moduleGroups.get(position);
         Module module = moduleGroup.getModule();
 
-        //Setting module details
+        // Set module details
         holder.moduleTitle.setText(module.getCode() + ": " + module.getName());
         holder.moduleLecturer.setText(module.getLecturer());
         holder.moduleSchedule.setText(moduleGroup.getSchedulesString());
 
-        // Setting card color
+        // Set card color
         int colorIndex = Math.abs(module.getCode().hashCode()) % MODULE_COLORS.length;
         holder.cardView.setCardBackgroundColor(MODULE_COLORS[colorIndex]);
 
-        // Seting switch state
-        holder.visibilityToggle.setChecked(moduleGroup.isAllVisible());
+        JsonUtil jsonUtil = new JsonUtil();
+        Context tempContext = holder.cardView.getContext();
+        Boolean moduleStatus = jsonUtil.getShowStatusForModule(tempContext, module.getCode());
+        // Set switch state
+        holder.visibilityToggle.setChecked(moduleStatus);
+        moduleGroup.setAllVisible(moduleStatus);
 
-        // Set up listener for switch state
+        // Set up toggle listener
         holder.visibilityToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             moduleGroup.setAllVisible(isChecked);
             listener.onModuleVisibilityChanged();
+            // Update show status in JSON file
+            jsonUtil.updateShowStatusAndSave(tempContext, module.getCode(), isChecked);
+        });
+
+        // Add scroll button listeners
+        holder.btnScrollUp.setOnClickListener(v -> {
+            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
+            if (recyclerView != null) {
+                recyclerView.smoothScrollBy(0, -200); // Scroll up by 200px
+            }
+        });
+
+        holder.btnScrollDown.setOnClickListener(v -> {
+            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
+            if (recyclerView != null) {
+                recyclerView.smoothScrollBy(0, 200); // Scroll down by 200px
+            }
         });
     }
 
@@ -159,6 +188,9 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         Switch visibilityToggle;
         CardView cardView;
 
+        ImageButton btnScrollUp;
+        ImageButton btnScrollDown;
+
         public ModuleViewHolder(@NonNull View itemView) {
             super(itemView);
             moduleTitle = itemView.findViewById(R.id.module_title);
@@ -166,6 +198,10 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             moduleSchedule = itemView.findViewById(R.id.module_schedule);
             visibilityToggle = itemView.findViewById(R.id.visibility_toggle);
             cardView = (CardView) itemView;
+
+            // Add these lines to initialize the buttons
+            btnScrollUp = itemView.findViewById(R.id.btn_scroll_up);
+            btnScrollDown = itemView.findViewById(R.id.btn_scroll_down);
         }
     }
 }

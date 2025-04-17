@@ -5,13 +5,11 @@ public class ModuleSchedule {
     private TimeSlot timeSlot;
     private boolean isMovable;
     private boolean isVisible;
-    private boolean notificationsEnabled;
-    public ModuleSchedule(Module module, TimeSlot timeSlot, boolean isMovable) {
+    public ModuleSchedule(Module module, TimeSlot timeSlot, boolean isMovable, boolean isVisible) {
         this.module = module;
         this.timeSlot = timeSlot;
         this.isMovable = isMovable;
-        this.isVisible = true;
-        this.notificationsEnabled = false;
+        this.isVisible = isVisible;
     }
 
     // Getters
@@ -19,9 +17,7 @@ public class ModuleSchedule {
     public TimeSlot getTimeSlot() { return timeSlot; }
     public boolean isMovable() { return isMovable; }
     public boolean isVisible() { return isVisible; }
-    public boolean isNotificationsEnabled() { return notificationsEnabled; }
     public void setVisible( boolean visible) { isVisible = visible; }
-    public void setNotificationsEnabled(boolean enabled) { notificationsEnabled = enabled; }
 
     // TODO: part of moving functionality
     public void setTimeSlot(TimeSlot timeSlot) {

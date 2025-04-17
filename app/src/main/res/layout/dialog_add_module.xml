@@ -1,0 +1,59 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/linear_layout_slots"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/input_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Module Code" />
+
+        <EditText
+            android:id="@+id/input_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Module Name" />
+
+        <EditText
+            android:id="@+id/input_lecturer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Lecturer Name" />
+
+        <EditText
+            android:id="@+id/input_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Module Type (e.g., lecture)" />
+
+        <!-- Slot Section -->
+        <TextView
+            android:id="@+id/text_slot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Slot Information"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+
+        <!-- Slot fields will be added here dynamically -->
+
+        <Button
+            android:id="@+id/btn_add_slot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Slot" />
+
+        <Button
+            android:id="@+id/btn_add_module"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Module" />
+    </LinearLayout>
+</ScrollView>
