@@ -120,6 +120,12 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 // Create new LinearLayout for each slot
                 LinearLayout newSlotLayout = new LinearLayout(requireContext());
                 newSlotLayout.setOrientation(LinearLayout.VERTICAL);
+                newSlotLayout.setTag("mainSlotLayout");
+
+                // Create a parent container for each complete slot
+                LinearLayout slotContainer = new LinearLayout(requireContext());
+                slotContainer.setOrientation(LinearLayout.VERTICAL);
+                slotContainer.setTag("slotContainer"); // Add tag to identify slot containers
 
                 // Create and add EditText for day
                 EditText inputDay = new EditText(requireContext());
@@ -159,8 +165,85 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
 
                 newSlotLayout.addView(radioGroupIsMovable);
 
+                // Container for alternative slots (initially empty)
+                LinearLayout alternativeSlotsContainer = new LinearLayout(requireContext());
+                alternativeSlotsContainer.setOrientation(LinearLayout.VERTICAL);
+                alternativeSlotsContainer.setTag("alternativeSlotsContainer");
+                newSlotLayout.addView(alternativeSlotsContainer);
+
+                // Button to add alternative slot (initially hidden)
+                Button btnAddAlternativeSlot = new Button(requireContext());
+                btnAddAlternativeSlot.setText("Add Alternative Time Slot");
+                btnAddAlternativeSlot.setVisibility(View.GONE);
+                newSlotLayout.addView(btnAddAlternativeSlot);
+
+                // RadioGroup listener to show/hide alternative slots option
+                radioGroupIsMovable.setOnCheckedChangeListener((group, checkedId) -> {
+                    if (checkedId == radioYes.getId()) {
+                        btnAddAlternativeSlot.setVisibility(View.VISIBLE);
+                    } else {
+                        btnAddAlternativeSlot.setVisibility(View.GONE);
+                        // Remove all alternative slots when switching to "No"
+                        alternativeSlotsContainer.removeAllViews();
+                    }
+                });
+
+                // Button to add alternative slot
+                btnAddAlternativeSlot.setOnClickListener(view_alternate -> {
+                    // Create alternative slot layout (similar to main slot but without movable option)
+                    LinearLayout altSlotLayout = new LinearLayout(requireContext());
+                    altSlotLayout.setOrientation(LinearLayout.VERTICAL);
+                    altSlotLayout.setTag("alternativeSlot");
+
+                    // Add divider
+                    View divider = new View(requireContext());
+                    divider.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            1
+                    ));
+                    divider.setBackgroundColor(Color.GRAY);
+                    altSlotLayout.addView(divider);
+
+                    // Add title
+                    TextView altTitle = new TextView(requireContext());
+                    altTitle.setText("Alternative Time Slot");
+                    altSlotLayout.addView(altTitle);
+
+                    // Add day input
+                    EditText altInputDay = new EditText(requireContext());
+                    altInputDay.setHint("Day (e.g., Tuesday)");
+                    altSlotLayout.addView(altInputDay);
+
+                    // Add start time input
+                    EditText altInputStartTime = new EditText(requireContext());
+                    altInputStartTime.setHint("Start Time (e.g., 02:00 PM)");
+                    altSlotLayout.addView(altInputStartTime);
+
+                    // Add end time input
+                    EditText altInputEndTime = new EditText(requireContext());
+                    altInputEndTime.setHint("End Time (e.g., 03:00 PM)");
+                    altSlotLayout.addView(altInputEndTime);
+
+                    // Add location input
+                    EditText altInputLocation = new EditText(requireContext());
+                    altInputLocation.setHint("Location");
+                    altSlotLayout.addView(altInputLocation);
+
+                    // Add remove button for this alternative slot
+                    Button btnRemoveAltSlot = new Button(requireContext());
+                    btnRemoveAltSlot.setText("Remove This Alternative Slot");
+                    btnRemoveAltSlot.setOnClickListener(removeView -> {
+                        alternativeSlotsContainer.removeView(altSlotLayout);
+                    });
+                    altSlotLayout.addView(btnRemoveAltSlot);
+
+                    // Add the alternative slot to the container
+                    alternativeSlotsContainer.addView(altSlotLayout);
+                });
+
+                slotContainer.addView(newSlotLayout);
                 // Add the new slot layout to the parent LinearLayout
-                linearLayoutSlots.addView(newSlotLayout);
+                linearLayoutSlots.addView(slotContainer);
             });
 
             confirmButton.setOnClickListener(confirmView -> {
@@ -169,31 +252,51 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 String lecturer = lecturerInput.getText().toString();
                 String type = typeInput.getText().toString();
 
-                Log.i("TAG", linearLayoutSlots.toString());
-
                 List<TimeSlot> timeSlotList = new ArrayList<>();
+                List<TimeSlot> alternativeSlotsList = new ArrayList<>();
+
                 int childCount = linearLayoutSlots.getChildCount();
+
                 // Iterate through each child view within the LinearLayout
                 for (int i = 0; i < childCount; i++) {
                     View childView = linearLayoutSlots.getChildAt(i);
 
-                    // Assuming each child is a LinearLayout containing input fields
-                    if (childView instanceof LinearLayout) {
-                        LinearLayout slotLayout = (LinearLayout) childView;
-                        TimeSlot timeSlot = readSlotLayout(slotLayout);
-                        timeSlotList.add(timeSlot);
-                    } else {
-                        Log.w("TimetableFragment", "Unexpected child type at position " + i + ": " + childView.getClass().getSimpleName());
+                    // Only process views that are our slot containers
+                    if (childView instanceof LinearLayout && "slotContainer".equals(childView.getTag())) {
+                        LinearLayout slotContainer = (LinearLayout) childView;
+
+                        // Find the main slot layout within the container
+                        LinearLayout slotLayout = slotContainer.findViewWithTag("mainSlotLayout");
+                        if (slotLayout != null) {
+                            // Read the main time slot
+                            TimeSlot timeSlot = readSlotLayout(slotLayout);
+                            timeSlotList.add(timeSlot);
+
+                            // Find the alternative slots container in this layout
+                            LinearLayout alternativeSlotsContainer = slotLayout.findViewWithTag("alternativeSlotsContainer");
+                            if (alternativeSlotsContainer != null) {
+                                // Process all alternative slots
+                                int altChildCount = alternativeSlotsContainer.getChildCount();
+                                for (int j = 0; j < altChildCount; j++) {
+                                    View altChildView = alternativeSlotsContainer.getChildAt(j);
+                                    if (altChildView instanceof LinearLayout && "alternativeSlot".equals(altChildView.getTag())) {
+                                        TimeSlot altTimeSlot = readSlotLayout((LinearLayout) altChildView);
+                                        alternativeSlotsList.add(altTimeSlot);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-
+                // Create and save the module
                 Module module = new Module(code, name, lecturer, true);
                 module.setType(type);
                 module.setTimeSlotList(timeSlotList);
+                module.setAlternativeSlots(alternativeSlotsList);
 
                 try {
-                    addModule(module); // your method to handle logic
+                    addModule(module);
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -471,6 +574,23 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                         Boolean.parseBoolean(moduleObj.getString("show"))
                 );
                 module.setType(moduleObj.getString("type"));
+
+                // Process alternative slots
+                JSONArray alternativeSlotsArray = moduleObj.getJSONArray("alternativeSlots");
+                for (int j = 0; j < alternativeSlotsArray.length(); j++) {
+                    JSONObject alternativeSlotsArrayJSONObject = alternativeSlotsArray.getJSONObject(j);
+
+                    // Create time slot
+                    TimeSlot alternativeTimeSlot = new TimeSlot(
+                            alternativeSlotsArrayJSONObject.getString("day"),
+                            alternativeSlotsArrayJSONObject.getString("startTime"),
+                            alternativeSlotsArrayJSONObject.getString("endTime"),
+                            alternativeSlotsArrayJSONObject.getString("location")
+                    );
+
+                    module.getAlternativeSlots().add(alternativeTimeSlot);
+                    Log.d("ModuleEntry", module.toString());
+                }
 
                 // Process current slots
                 JSONArray slotsArray = moduleObj.getJSONArray("slots");

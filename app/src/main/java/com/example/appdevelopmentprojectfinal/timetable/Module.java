@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Module {
+public class    Module {
     private final String code;
     private final String name;
     private final String lecturer;
@@ -16,12 +16,15 @@ public class Module {
 
     private List<TimeSlot> timeSlotList;
 
+    private List<TimeSlot> alternativeSlots;
+
     public Module(String code, String name, String lecturer, boolean show) {
         this.code = code;
         this.name = name;
         this.lecturer = lecturer;
         this.show = show;
         this.timeSlotList = new ArrayList<>();
+        this.alternativeSlots = new ArrayList<>();
     }
 
     // Getters
@@ -47,6 +50,14 @@ public class Module {
         this.type = type;
     }
 
+    public List<TimeSlot> getAlternativeSlots() {
+        return alternativeSlots;
+    }
+
+    public void setAlternativeSlots(List<TimeSlot> alternativeSlots) {
+        this.alternativeSlots = alternativeSlots;
+    }
+
     // This is used in toString() method
     String getLecturer() { return lecturer; }
 
@@ -63,13 +74,25 @@ public class Module {
         }
         slotsString.append("]");
 
+        StringBuilder alternativeSlotsString = new StringBuilder("[");
+        if (alternativeSlots != null && !alternativeSlots.isEmpty()) {
+            for (int i = 0; i < alternativeSlots.size(); i++) {
+                alternativeSlotsString.append(alternativeSlots.get(i).toString());
+                if (i < alternativeSlots.size() - 1) {
+                    alternativeSlotsString.append(",");
+                }
+            }
+        }
+        alternativeSlotsString.append("]");
+
         return "{" +
                 "\"code\":\"" + code + "\"," +
                 "\"name\":\"" + name + "\"," +
                 "\"lecturer\":\"" + lecturer + "\"," +
                 "\"type\":\"" + type + "\"," +
                 "\"show\":" + show + "," +
-                "\"slots\":" + slotsString.toString() +
+                "\"slots\":" + slotsString.toString() + "," +
+                "\"alternativeSlots\":" + alternativeSlotsString.toString() +
                 "}";
     }
 }

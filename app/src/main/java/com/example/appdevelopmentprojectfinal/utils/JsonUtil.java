@@ -87,6 +87,7 @@ public class JsonUtil {
     }
 
     public void appendModuleToFile(Context context, JSONObject newModule) {
+        Log.i("NEW MODULE", newModule.toString());
         try {
             File file = new File(context.getFilesDir(), internalFileName);
             JSONObject jsonData;
