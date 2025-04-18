@@ -64,20 +64,20 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/btn_scroll_up"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/arrow_up_float" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/btn_scroll_up"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:layout_marginEnd="8dp"-->
+<!--                android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--                android:src="@android:drawable/arrow_up_float" />-->
 
-            <ImageButton
-                android:id="@+id/btn_scroll_down"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/arrow_down_float" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/btn_scroll_down"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--                android:src="@android:drawable/arrow_down_float" />-->
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

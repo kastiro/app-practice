@@ -94,6 +94,18 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         emptyView = view.findViewById(R.id.empty_view);
         moduleListView = view.findViewById(R.id.module_list);
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext()) {
+            @Override
+            public boolean canScrollVertically() {
+                // Allow RecyclerView to scroll within NestedScrollView
+                return true;
+            }
+        };
+
+        moduleListView.setLayoutManager(layoutManager);
+        moduleListView.setHasFixedSize(true);
+        moduleListView.setNestedScrollingEnabled(true);
+
         addModuleButton = view.findViewById(R.id.add_module_button);
         addModuleButton.setOnClickListener(v -> {
             // Inflate custom dialog layout
@@ -308,8 +320,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
             });
         });
 
-        // Setup RecyclerView for module management
-        moduleListView.setLayoutManager(new LinearLayoutManager(getContext()));
+
 
         // Load timetable data
         loadTimetableData();

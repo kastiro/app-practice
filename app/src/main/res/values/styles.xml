@@ -8,4 +8,17 @@
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
+    
+    <!-- Calendar date text style -->
+    <style name="CalendarDateTextAppearance">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    
+    <!-- Calendar weekday text style -->
+    <style name="CalendarWeekDayTextAppearance">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
+    </style>
 </resources>

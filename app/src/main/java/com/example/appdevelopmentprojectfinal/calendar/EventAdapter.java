@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,25 +12,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevelopmentprojectfinal.R;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Adapter for displaying calendar events in a RecyclerView.
  */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
     
-    private List<Event> events;
+    private List<com.example.appdevelopmentprojectfinal.calendar.Event> events;
     private Context context;
     private SimpleDateFormat dateFormat;
     private OnEventClickListener listener;
     
     public interface OnEventClickListener {
-        void onEventClick(Event event, int position);
-        void onTodoStatusChanged(Event event, int position, boolean isChecked);
+        void onEventClick(com.example.appdevelopmentprojectfinal.calendar.Event event, int position);
     }
     
-    public EventAdapter(Context context, List<Event> events) {
+    public EventAdapter(Context context, List<com.example.appdevelopmentprojectfinal.calendar.Event> events) {
         this.context = context;
         this.events = events;
         this.dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
@@ -50,18 +51,26 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        Event event = events.get(position);
+        com.example.appdevelopmentprojectfinal.calendar.Event event = events.get(position);
         
         holder.titleTextView.setText(event.getTitle());
         holder.descriptionTextView.setText(event.getDescription());
         holder.timeTextView.setText(dateFormat.format(event.getDate()));
         
-        // Show/hide checkbox based on event type
+        // Calculate and display countdown
+        String countdownText = getCountdownText(event.getDate());
+        holder.countdownTextView.setText(countdownText);
+        
+        // Set countdown text color
+        setCountdownColor(holder.countdownTextView, event.getDate());
+        
+        // Set the color of the left indicator based on event type
         if (event.isTodo()) {
-            holder.checkBox.setVisibility(View.VISIBLE);
-            holder.checkBox.setChecked(event.isCompleted());
+            // Orange for TODO
+            holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_orange_light));
         } else {
-            holder.checkBox.setVisibility(View.GONE);
+            // Red for EVENT
+            holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
         }
         
         // Setup click listeners
@@ -70,13 +79,72 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 listener.onEventClick(event, position);
             }
         });
+    }
+    
+    /**
+     * Get countdown text
+     */
+    private String getCountdownText(Date eventDate) {
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
         
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (listener != null && event.isTodo()) {
-                event.setCompleted(isChecked);
-                listener.onTodoStatusChanged(event, position, isChecked);
-            }
-        });
+        Calendar eventCal = Calendar.getInstance();
+        eventCal.setTime(eventDate);
+        eventCal.set(Calendar.HOUR_OF_DAY, 0);
+        eventCal.set(Calendar.MINUTE, 0);
+        eventCal.set(Calendar.SECOND, 0);
+        eventCal.set(Calendar.MILLISECOND, 0);
+        
+        long diffInMillis = eventCal.getTimeInMillis() - today.getTimeInMillis();
+        long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        
+        if (diffInDays < 0) {
+            return context.getString(R.string.past);
+        } else if (diffInDays == 0) {
+            return context.getString(R.string.today);
+        } else if (diffInDays == 1) {
+            return context.getString(R.string.tomorrow);
+        } else {
+            return diffInDays + " " + context.getString(R.string.days);
+        }
+    }
+    
+    /**
+     * Set countdown text color based on date
+     */
+    private void setCountdownColor(TextView textView, Date eventDate) {
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+        
+        Calendar eventCal = Calendar.getInstance();
+        eventCal.setTime(eventDate);
+        eventCal.set(Calendar.HOUR_OF_DAY, 0);
+        eventCal.set(Calendar.MINUTE, 0);
+        eventCal.set(Calendar.SECOND, 0);
+        eventCal.set(Calendar.MILLISECOND, 0);
+        
+        long diffInMillis = eventCal.getTimeInMillis() - today.getTimeInMillis();
+        long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        
+        if (diffInDays < 0) {
+            // Expired events - Gray
+            textView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+        } else if (diffInDays <= 1) {
+            // Today or tomorrow - Red
+            textView.setTextColor(context.getResources().getColor(android.R.color.holo_red_light));
+        } else if (diffInDays <= 3) {
+            // Within 3 days - Orange
+            textView.setTextColor(context.getResources().getColor(android.R.color.holo_orange_dark));
+        } else {
+            // More than 3 days - Blue
+            textView.setTextColor(context.getResources().getColor(android.R.color.holo_blue_dark));
+        }
     }
     
     @Override
@@ -84,7 +152,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         return events != null ? events.size() : 0;
     }
     
-    public void updateEvents(List<Event> newEvents) {
+    public void updateEvents(List<com.example.appdevelopmentprojectfinal.calendar.Event> newEvents) {
         this.events = newEvents;
         notifyDataSetChanged();
     }
@@ -93,14 +161,16 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         TextView titleTextView;
         TextView descriptionTextView;
         TextView timeTextView;
-        CheckBox checkBox;
+        TextView countdownTextView;
+        View typeIndicator;
         
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.tv_event_title);
             descriptionTextView = itemView.findViewById(R.id.tv_event_description);
             timeTextView = itemView.findViewById(R.id.tv_event_time);
-            checkBox = itemView.findViewById(R.id.checkbox_todo);
+            countdownTextView = itemView.findViewById(R.id.tv_event_countdown);
+            typeIndicator = itemView.findViewById(R.id.view_event_type_indicator);
         }
     }
 } 

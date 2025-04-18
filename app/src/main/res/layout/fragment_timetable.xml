@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".timetable.TimetableFragment">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".timetable.TimetableFragment">
@@ -143,8 +143,8 @@
                 android:id="@+id/module_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"/>
+                android:nestedScrollingEnabled="true"/>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </FrameLayout>
