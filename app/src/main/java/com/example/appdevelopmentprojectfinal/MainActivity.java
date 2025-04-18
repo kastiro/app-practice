@@ -10,7 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.appdevelopmentprojectfinal.databinding.ActivityMainBinding;
 import com.example.appdevelopmentprojectfinal.timetable.TimetableFragment;
 import com.example.appdevelopmentprojectfinal.calendar.CalendarFragment;
-import com.example.appdevelopmentprojectfinal.timetable.TimetableNotificationManager;
+//import com.example.appdevelopmentprojectfinal.timetable.TimetableNotificationManager;
 
 import android.util.Log;
 
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Create notification channel and load fragments
-        TimetableNotificationManager.createNotificationChannel(this);
+//        TimetableNotificationManager.createNotificationChannel(this);
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
     private void setupNavigation() {
-        TimetableNotificationManager.createNotificationChannel(this);
+//        TimetableNotificationManager.createNotificationChannel(this);
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
