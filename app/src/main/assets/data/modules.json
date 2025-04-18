@@ -1,0 +1,60 @@
+{
+  "modules": [
+    {
+      "code": "CS4084",
+      "name": "MOBILE APPLICATION DEVELOPMENT",
+      "year": 3,
+      "tutor": "JOHN NOLL",
+      "domain": "Faculty of Science and Engineering",
+      "department": "Computer Science & Information Systems"
+    },
+    {
+      "code": "CS4106",
+      "name": "MACHINE LEARNING",
+      "year": 3,
+      "tutor": "SARAH CONNOR",
+      "domain": "Faculty of Science and Engineering",
+      "department": "Computer Science & Information Systems"
+    },
+    {
+      "code": "CS4116",
+      "name": "SOFTWARE DEVELOPMENT PROJECT",
+      "year": 3,
+      "tutor": "JIM BUCKLEY",
+      "domain": "Faculty of Science and Engineering",
+      "department": "Computer Science & Information Systems"
+    },
+    {
+      "code": "CS4187",
+      "name": "PROFESSIONAL ISSUES IN COMPUTING",
+      "year": 3,
+      "tutor": "YVONNE CLIFF",
+      "domain": "Faculty of Science and Engineering",
+      "department": "Computer Science & Information Systems"
+    },
+    {
+      "code": "CS4457",
+      "name": "PROJECT MANAGEMENT AND PRACTICE",
+      "year": 3,
+      "tutor": "SARAH BEECHAM",
+      "domain": "Faculty of Science and Engineering",
+      "department": "Computer Science & Information Systems"
+    },
+    {
+      "code": "MS4034",
+      "name": "BUSINESS DATA COMMUNICATIONS",
+      "year": 3,
+      "tutor": "NEIL MULLIGAN",
+      "domain": "Faculty of Business",
+      "department": "Management and Marketing"
+    },
+    {
+      "code": "ET4162",
+      "name": "INTERNET OF THINGS",
+      "year": 3,
+      "tutor": "DAVID O'SULLIVAN",
+      "domain": "Faculty of Science and Engineering",
+      "department": "Electronic & Computer Engineering"
+    }
+  ]
+}

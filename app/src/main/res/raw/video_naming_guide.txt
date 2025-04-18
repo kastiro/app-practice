@@ -1,0 +1,35 @@
+# Video Resource Naming Guide
+
+This guide explains how to name video files for proper loading in the marketplace.
+
+## Naming Convention Hierarchy (searched in this order)
+
+1. **Course-specific content videos**: `course_[course_id]_[video_filename]`
+   - Example: course_cs4084_1_android_intro.mp4
+
+2. **Generic content videos**: `[video_filename]`
+   - Example: android_intro.mp4
+
+3. **Course-specific default video**: `course_[course_id]`
+   - Example: course_cs4084_1.mp4
+
+4. **Global default video**: `course_preview_demo.mp4`
+
+## Example Scenario
+
+For a course with ID "CS4084-1" and video URL "android_intro.mp4":
+
+1. First, the app looks for: `course_cs4084_1_android_intro.mp4`
+2. If not found, it looks for: `android_intro.mp4`
+3. If not found, it looks for: `course_cs4084_1.mp4`
+4. If none are found, it uses: `course_preview_demo.mp4`
+
+## Important Notes
+
+- All resource names must be lowercase and use underscores instead of dashes or spaces
+- Do not include file extensions in the resource names
+- Place all video files in the `res/raw/` directory
+- At minimum, always include `course_preview_demo.mp4` as the fallback video
+- For each course, consider adding a course-specific default video
+- Maximum recommended file size: 10MB per video
+- Recommended format: MP4 with H.264 encoding, 720p or lower resolution
