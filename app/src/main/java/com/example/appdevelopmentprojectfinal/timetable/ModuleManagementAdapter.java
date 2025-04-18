@@ -141,39 +141,36 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         holder.moduleLecturer.setText(module.getLecturer());
         holder.moduleSchedule.setText(moduleGroup.getSchedulesString());
 
-        // Set card color
+        // card color
         int colorIndex = Math.abs(module.getCode().hashCode()) % MODULE_COLORS.length;
         holder.cardView.setCardBackgroundColor(MODULE_COLORS[colorIndex]);
 
         JsonUtil jsonUtil = new JsonUtil();
         Context tempContext = holder.cardView.getContext();
         Boolean moduleStatus = jsonUtil.getShowStatusForModule(tempContext, module.getCode());
-        // Set switch state
+
         holder.visibilityToggle.setChecked(moduleStatus);
         moduleGroup.setAllVisible(moduleStatus);
-
-        // Set up toggle listener
         holder.visibilityToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             moduleGroup.setAllVisible(isChecked);
             listener.onModuleVisibilityChanged();
-            // Update show status in JSON file
             jsonUtil.updateShowStatusAndSave(tempContext, module.getCode(), isChecked);
         });
 
-        // Add scroll button listeners
-        holder.btnScrollUp.setOnClickListener(v -> {
-            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
-            if (recyclerView != null) {
-                recyclerView.smoothScrollBy(0, -200); // Scroll up by 200px
-            }
-        });
-
-        holder.btnScrollDown.setOnClickListener(v -> {
-            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
-            if (recyclerView != null) {
-                recyclerView.smoothScrollBy(0, 200); // Scroll down by 200px
-            }
-        });
+//        // Add scroll button listeners
+//        holder.btnScrollUp.setOnClickListener(v -> {
+//            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
+//            if (recyclerView != null) {
+//                recyclerView.smoothScrollBy(0, -200); // Scroll up by 200px
+//            }
+//        });
+//
+//        holder.btnScrollDown.setOnClickListener(v -> {
+//            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
+//            if (recyclerView != null) {
+//                recyclerView.smoothScrollBy(0, 200); // Scroll down by 200px
+//            }
+//        });
     }
 
     @Override
@@ -199,9 +196,8 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             visibilityToggle = itemView.findViewById(R.id.visibility_toggle);
             cardView = (CardView) itemView;
 
-            // Add these lines to initialize the buttons
-            btnScrollUp = itemView.findViewById(R.id.btn_scroll_up);
-            btnScrollDown = itemView.findViewById(R.id.btn_scroll_down);
+//            btnScrollUp = itemView.findViewById(R.id.btn_scroll_up);
+//            btnScrollDown = itemView.findViewById(R.id.btn_scroll_down);
         }
     }
 }
