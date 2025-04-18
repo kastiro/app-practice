@@ -33,6 +33,12 @@
             android:layout_height="wrap_content"
             android:hint="Module Type (e.g., lecture)" />
 
+        <Spinner
+            android:id="@+id/type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/module_types" />
+
         <!-- Slot Section -->
         <TextView
             android:id="@+id/text_slot"

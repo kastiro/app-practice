@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -105,7 +106,9 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
             EditText nameInput = dialogView.findViewById(R.id.input_name);
             EditText lecturerInput = dialogView.findViewById(R.id.input_lecturer);
             EditText typeInput = dialogView.findViewById(R.id.input_type);
+            typeInput.setVisibility(View.GONE);
             Button confirmButton = dialogView.findViewById(R.id.btn_add_module);
+            Spinner typeSpinner = dialogView.findViewById(R.id.type_spinner);
 
             AlertDialog dialog = new AlertDialog.Builder(getContext())
                     .setView(dialogView)
@@ -251,6 +254,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 String name = nameInput.getText().toString();
                 String lecturer = lecturerInput.getText().toString();
                 String type = typeInput.getText().toString();
+                type = typeSpinner.getSelectedItem().toString();
 
                 List<TimeSlot> timeSlotList = new ArrayList<>();
                 List<TimeSlot> alternativeSlotsList = new ArrayList<>();
@@ -524,6 +528,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         TextView moduleDay = bottomSheetView.findViewById(R.id.module_day);
         TextView moduleStartTime = bottomSheetView.findViewById(R.id.module_start_time);
         TextView moduleEndTime = bottomSheetView.findViewById(R.id.module_end_time);
+        TextView moduleType = bottomSheetView.findViewById(R.id.module_type);
 
         // Remove the hide/show button as we now handle this in the module management section
         View hideShowButton = bottomSheetView.findViewById(R.id.hide_show_button);
@@ -539,6 +544,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         moduleDay.setText(timeSlot.getDay());
         moduleStartTime.setText(timeSlot.getStartTime());
         moduleEndTime.setText(timeSlot.getEndTime());
+        moduleType.setText(module.getType());
 
         // Setting the content view for the bottom sheet
         bottomSheetDialog.setContentView(bottomSheetView);
