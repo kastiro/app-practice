@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -33,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -143,19 +145,85 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                 slotContainer.setTag("slotContainer"); // Add tag to identify slot containers
 
                 // Create and add EditText for day
-                EditText inputDay = new EditText(requireContext());
-                inputDay.setHint("Day (e.g., Monday)");
-                newSlotLayout.addView(inputDay);
+//                EditText inputDay = new EditText(requireContext());
+//                inputDay.setHint("Day (e.g., Monday)");
+//                newSlotLayout.addView(inputDay);
+
+                Spinner daySpinner = new Spinner(requireContext());
+                // Set layout parameters (optional, usually done automatically)
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                daySpinner.setLayoutParams(layoutParams);
+
+                // Load the entries from the string array resource
+                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                        requireContext(),
+                        R.array.days_of_week, // This is the array defined in your `res/values/strings.xml`
+                        android.R.layout.simple_spinner_item
+                );
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                // Set the adapter to the Spinner
+                daySpinner.setAdapter(adapter);
+
+                // Add the Spinner to your layout
+                newSlotLayout.addView(daySpinner);
 
                 // Create and add EditText for start time
-                EditText inputStartTime = new EditText(requireContext());
-                inputStartTime.setHint("Start Time (e.g., 09:00 AM)");
-                newSlotLayout.addView(inputStartTime);
+//                EditText inputStartTime = new EditText(requireContext());
+//                inputStartTime.setHint("Start Time (e.g., 09:00 AM)");
+//                newSlotLayout.addView(inputStartTime);
+
+                Spinner startTimeSpinner = new Spinner(requireContext());
+                // Set layout parameters (optional, usually done automatically)
+                LinearLayout.LayoutParams startTimeLlayoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                startTimeSpinner.setLayoutParams(startTimeLlayoutParams);
+
+                // Load the entries from the string array resource
+                ArrayAdapter<CharSequence> startTimeAdapter = ArrayAdapter.createFromResource(
+                        requireContext(),
+                        R.array.start_time_slots, // This is the array defined in your `res/values/strings.xml`
+                        android.R.layout.simple_spinner_item
+                );
+                startTimeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                // Set the adapter to the Spinner
+                startTimeSpinner.setAdapter(startTimeAdapter);
+                startTimeSpinner.setTag("startTimeSpinner");
+
+                // Add the Spinner to your layout
+                newSlotLayout.addView(startTimeSpinner);
 
                 // Create and add EditText for end time
-                EditText inputEndTime = new EditText(requireContext());
-                inputEndTime.setHint("End Time (e.g., 10:00 AM)");
-                newSlotLayout.addView(inputEndTime);
+//                EditText inputEndTime = new EditText(requireContext());
+//                inputEndTime.setHint("End Time (e.g., 10:00 AM)");
+//                newSlotLayout.addView(inputEndTime);
+
+                Spinner endTimeSpinner = new Spinner(requireContext());
+                // Set layout parameters (optional, usually done automatically)
+                LinearLayout.LayoutParams endTimeLlayoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                endTimeSpinner.setLayoutParams(endTimeLlayoutParams);
+
+                // Load the entries from the string array resource
+                ArrayAdapter<CharSequence> endTimeAdapter = ArrayAdapter.createFromResource(
+                        requireContext(),
+                        R.array.end_time_slots, // This is the array defined in your `res/values/strings.xml`
+                        android.R.layout.simple_spinner_item
+                );
+                endTimeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                // Set the adapter to the Spinner
+                endTimeSpinner.setAdapter(endTimeAdapter);
+                endTimeSpinner.setTag("endTimeSpinner");
+
+                // Add the Spinner to your layout
+                newSlotLayout.addView(endTimeSpinner);
 
                 // Create and add EditText for location
                 EditText inputLocation = new EditText(requireContext());
@@ -225,19 +293,85 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     altSlotLayout.addView(altTitle);
 
                     // Add day input
-                    EditText altInputDay = new EditText(requireContext());
-                    altInputDay.setHint("Day (e.g., Tuesday)");
-                    altSlotLayout.addView(altInputDay);
+//                    EditText altInputDay = new EditText(requireContext());
+//                    altInputDay.setHint("Day (e.g., Tuesday)");
+//                    altSlotLayout.addView(altInputDay);
+
+                    Spinner altDaySpinner = new Spinner(requireContext());
+                    // Set layout parameters (optional, usually done automatically)
+                    LinearLayout.LayoutParams altLayoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    altDaySpinner.setLayoutParams(altLayoutParams);
+
+                    // Load the entries from the string array resource
+                    ArrayAdapter<CharSequence> altAdapter = ArrayAdapter.createFromResource(
+                            requireContext(),
+                            R.array.days_of_week, // This is the array defined in your `res/values/strings.xml`
+                            android.R.layout.simple_spinner_item
+                    );
+                    altAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                    // Set the adapter to the Spinner
+                    altDaySpinner.setAdapter(altAdapter);
+
+                    // Add the Spinner to your layout
+                    altSlotLayout.addView(altDaySpinner);
 
                     // Add start time input
-                    EditText altInputStartTime = new EditText(requireContext());
-                    altInputStartTime.setHint("Start Time (e.g., 02:00 PM)");
-                    altSlotLayout.addView(altInputStartTime);
+//                    EditText altInputStartTime = new EditText(requireContext());
+//                    altInputStartTime.setHint("Start Time (e.g., 02:00 PM)");
+//                    altSlotLayout.addView(altInputStartTime);
+
+                    Spinner altStartTimeSpinner = new Spinner(requireContext());
+                    // Set layout parameters (optional, usually done automatically)
+                    LinearLayout.LayoutParams altStartTimeLlayoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    altStartTimeSpinner.setLayoutParams(altStartTimeLlayoutParams);
+
+                    // Load the entries from the string array resource
+                    ArrayAdapter<CharSequence> altStartTimeAdapter = ArrayAdapter.createFromResource(
+                            requireContext(),
+                            R.array.start_time_slots, // This is the array defined in your `res/values/strings.xml`
+                            android.R.layout.simple_spinner_item
+                    );
+                    altStartTimeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    // Set the adapter to the Spinner
+                    altStartTimeSpinner.setAdapter(altStartTimeAdapter);
+                    altStartTimeSpinner.setTag("altStartTimeSpinner");
+
+                    // Add the Spinner to your layout
+                    altSlotLayout.addView(altStartTimeSpinner);
 
                     // Add end time input
-                    EditText altInputEndTime = new EditText(requireContext());
-                    altInputEndTime.setHint("End Time (e.g., 03:00 PM)");
-                    altSlotLayout.addView(altInputEndTime);
+//                    EditText altInputEndTime = new EditText(requireContext());
+//                    altInputEndTime.setHint("End Time (e.g., 03:00 PM)");
+//                    altSlotLayout.addView(altInputEndTime);
+
+                    Spinner altEndTimeSpinner = new Spinner(requireContext());
+                    // Set layout parameters (optional, usually done automatically)
+                    LinearLayout.LayoutParams altEndTimeLlayoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    altEndTimeSpinner.setLayoutParams(altEndTimeLlayoutParams);
+
+                    // Load the entries from the string array resource
+                    ArrayAdapter<CharSequence> altEndTimeAdapter = ArrayAdapter.createFromResource(
+                            requireContext(),
+                            R.array.end_time_slots, // This is the array defined in your `res/values/strings.xml`
+                            android.R.layout.simple_spinner_item
+                    );
+                    altEndTimeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    // Set the adapter to the Spinner
+                    altEndTimeSpinner.setAdapter(altEndTimeAdapter);
+                    altEndTimeSpinner.setTag("altEndTimeSpinner");
+
+                    // Add the Spinner to your layout
+                    altSlotLayout.addView(altEndTimeSpinner);
 
                     // Add location input
                     EditText altInputLocation = new EditText(requireContext());
@@ -368,6 +502,18 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                         isMovable = selectedRadioButton.getText().toString().equalsIgnoreCase("Yes");
                     }
                 }
+            } else if (inputView instanceof Spinner) {
+                Spinner spinner = (Spinner) inputView;
+
+                if (inputView.getTag() != null && (inputView.getTag().equals("startTimeSpinner") || inputView.getTag().equals("altStartTimeSpinner"))) {
+                    startTime = spinner.getSelectedItem().toString();
+                } else if (inputView.getTag() != null && (inputView.getTag().equals("endTimeSpinner") || inputView.getTag().equals("altEndTimeSpinner"))) {
+                    endTime = spinner.getSelectedItem().toString();
+                } else {
+                    day = spinner.getSelectedItem().toString();
+                }
+
+                Log.d("TimetableFragment", "Day: " + day);
             }
         }
 
@@ -375,6 +521,15 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         Log.d("TimetableFragment", "Slot: Day=" + day + ", Start=" + startTime + ", End=" + endTime + ", Loc=" + location + ", Movable=" + isMovable);
         // Here you might add logic to store this information to ModuleSchedule Object
         return new TimeSlot(day, startTime, endTime, location);
+    }
+
+    public boolean isValidDayOfWeek(String day) {
+        try {
+            DayOfWeek.valueOf(day.toUpperCase());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private void addModule(Module module) throws JSONException {
@@ -606,7 +761,6 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     );
 
                     module.getAlternativeSlots().add(alternativeTimeSlot);
-                    Log.d("ModuleEntry", module.toString());
                 }
 
                 // Process current slots

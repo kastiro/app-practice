@@ -14,6 +14,7 @@ import com.example.appdevelopmentprojectfinal.calendar.CalendarFragment;
 
 import android.util.Log;
 
+import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -69,6 +70,10 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+
+        // JSON Internal Storage
+        JsonUtil jsonUtil = new JsonUtil();
+        jsonUtil.copyFileToInternalStorageIfNeeded(this, "timetable.json");
 
     }
 
