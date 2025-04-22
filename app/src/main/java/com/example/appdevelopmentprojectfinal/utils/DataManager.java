@@ -31,6 +31,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import com.example.appdevelopmentprojectfinal.calendar.Event;
+
 // Central data manager to avoid duplicate loading and keep data consistent across fragments
 public class DataManager {
     private static final String TAG = "TimetableApp:DataManager";
@@ -42,6 +44,7 @@ public class DataManager {
     private List<Module> modules;
     private List<Course> courses;
     private Map<String, Module> moduleMap;
+    private List<Event> events;
 
     // Private constructor for singleton
     private DataManager() {
@@ -49,6 +52,7 @@ public class DataManager {
         modules = new ArrayList<>();
         courses = new ArrayList<>();
         moduleMap = new HashMap<>();
+        events = new ArrayList<>();
     }
 
     public static synchronized DataManager getInstance() {
@@ -62,7 +66,7 @@ public class DataManager {
         loadUserFromFirebase(userId, listener);
         loadModulesFromFirebase();
         loadCoursesFromFirebase();
-
+        loadEventsFromFirebase(userId);
     }
 
     private void loadUserFromFirebase(String userId, OnUserLoadedListener listener) {
@@ -256,6 +260,124 @@ private void loadModulesFromAsset(Context context) {
     }
     */
 
+    /**
+     * Load user events from Firebase
+     */
+    private void loadEventsFromFirebase(String userId) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://appdevelopmentprojectfinal-default-rtdb.europe-west1.firebasedatabase.app");
+        DatabaseReference eventsRef = database.getReference("events");
+        
+        // Query events where userId equals the current user
+        eventsRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                events.clear();
+                for (DataSnapshot eventSnapshot : snapshot.getChildren()) {
+                    Event event = eventSnapshot.getValue(Event.class);
+                    if (event != null) {
+                        events.add(event);
+                    }
+                }
+                Log.d(TAG, "Loaded " + events.size() + " events from Firebase");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "Error loading events from Firebase: " + error.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Get all events
+     */
+    public List<Event> getAllEvents() {
+        return events;
+    }
+
+    /**
+     * Save event to Firebase
+     */
+    public void saveEvent(Event event, final OnEventSavedListener listener) {
+        if (currentUser == null) {
+            if (listener != null) {
+                listener.onError("No user logged in");
+            }
+            return;
+        }
+
+        // Set event user ID
+        event.setUserId(currentUser.getEmail());
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://appdevelopmentprojectfinal-default-rtdb.europe-west1.firebasedatabase.app");
+        DatabaseReference eventsRef = database.getReference("events");
+
+        // Use event ID as key, generate one if it doesn't exist
+        if (event.getId() == null || event.getId().isEmpty()) {
+            event.setId(eventsRef.push().getKey());
+        }
+
+        eventsRef.child(event.getId()).setValue(event)
+                .addOnSuccessListener(aVoid -> {
+                    // Add to local list
+                    boolean found = false;
+                    for (int i = 0; i < events.size(); i++) {
+                        if (events.get(i).getId().equals(event.getId())) {
+                            events.set(i, event);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        events.add(event);
+                    }
+                    
+                    if (listener != null) {
+                        listener.onEventSaved(event);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (listener != null) {
+                        listener.onError(e.getMessage());
+                    }
+                });
+    }
+
+    /**
+     * Delete event
+     */
+    public void deleteEvent(Event event, final OnEventDeletedListener listener) {
+        if (event.getId() == null || event.getId().isEmpty()) {
+            if (listener != null) {
+                listener.onError("Event has no ID");
+            }
+            return;
+        }
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://appdevelopmentprojectfinal-default-rtdb.europe-west1.firebasedatabase.app");
+        DatabaseReference eventRef = database.getReference("events").child(event.getId());
+
+        eventRef.removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    // Remove from local list
+                    for (int i = 0; i < events.size(); i++) {
+                        if (events.get(i).getId().equals(event.getId())) {
+                            events.remove(i);
+                            break;
+                        }
+                    }
+                    
+                    if (listener != null) {
+                        listener.onEventDeleted();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (listener != null) {
+                        listener.onError(e.getMessage());
+                    }
+                });
+    }
+
     // User-related methods
     public User getCurrentUser() {
         return currentUser;
@@ -433,8 +555,19 @@ private void loadModulesFromAsset(Context context) {
 
         return false;
     }
+
     public interface OnUserLoadedListener {
         void onUserLoaded(User user);
+        void onError(String error);
+    }
+
+    public interface OnEventSavedListener {
+        void onEventSaved(Event event);
+        void onError(String error);
+    }
+
+    public interface OnEventDeletedListener {
+        void onEventDeleted();
         void onError(String error);
     }
 }

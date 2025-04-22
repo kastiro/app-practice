@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.widget.Toast;
 import android.widget.RadioGroup;
 import android.widget.RadioButton;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.appdevelopmentprojectfinal.R;
+import com.example.appdevelopmentprojectfinal.utils.DataManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class CalendarFragment extends Fragment implements EventAdapter.OnEventClickListener {
+    private static final String TAG = "TimetableApp:CalendarFragment";
 
     private TextView textViewCalendarTitle;
     private CustomCalendarView customCalendarView;
@@ -50,9 +53,6 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     // Selected date (milliseconds since epoch)
     private long selectedDate;
     
-    // Event list
-    private List<com.example.appdevelopmentprojectfinal.calendar.Event> allEvents;
-
     public CalendarFragment() {
         // Required empty public constructor
     }
@@ -77,9 +77,6 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         
         // Set default selected date to today
         selectedDate = System.currentTimeMillis();
-        
-        // Initialize events list
-        initializeEventsList();
         
         // Setup RecyclerView
         setupRecyclerView();
@@ -110,13 +107,9 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     
     private void setupRecyclerView() {
         recyclerViewEvents.setLayoutManager(new LinearLayoutManager(getContext()));
-        eventAdapter = new EventAdapter(getContext(), new ArrayList<com.example.appdevelopmentprojectfinal.calendar.Event>());
+        eventAdapter = new EventAdapter(getContext(), new ArrayList<Event>());
         eventAdapter.setOnEventClickListener(this);
         recyclerViewEvents.setAdapter(eventAdapter);
-    }
-    
-    private void initializeEventsList() {
-        allEvents = new ArrayList<>();
     }
     
     private void setupTabListeners() {
@@ -236,15 +229,18 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
             String description = editTextDescription.getText().toString().trim();
             
             if (title.isEmpty()) {
+                Toast.makeText(getContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
             
             // Check if event or todo is selected
             int eventType = radioButtonEvent.isChecked() ? Event.TYPE_EVENT : Event.TYPE_TODO;
             
-            // Create and add new item
+            // Create new item
             Event newItem = new Event(title, description, selectedCal.getTime(), eventType);
-            addEvent(newItem);
+            
+            // Save to Firebase
+            saveEventToFirebase(newItem);
         });
         
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -253,18 +249,33 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         builder.create().show();
     }
     
-    private void addEvent(Event event) {
-        // Add event to list
-        allEvents.add(event);
-        
-        // Update event marker on calendar
-        Calendar calendar = getCalendarFromDate(event.getDate());
-        int type = event.getType() == Event.TYPE_EVENT ? 
-            CustomCalendarView.TYPE_EVENT : CustomCalendarView.TYPE_TODO;
-        customCalendarView.addEvent(calendar, type);
-        
-        // Refresh display
-        loadItems();
+    private void saveEventToFirebase(Event event) {
+        DataManager.getInstance().saveEvent(event, new DataManager.OnEventSavedListener() {
+            @Override
+            public void onEventSaved(Event savedEvent) {
+                // Update event markers on calendar
+                Calendar calendar = getCalendarFromDate(savedEvent.getDate());
+                int type = savedEvent.getType() == Event.TYPE_EVENT ? 
+                    CustomCalendarView.TYPE_EVENT : CustomCalendarView.TYPE_TODO;
+                customCalendarView.addEvent(calendar, type);
+                
+                // Refresh display
+                loadItems();
+                
+                // Show success message
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Event saved successfully", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error saving event: " + error);
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Error saving event: " + error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
     
     private void updateMonthText() {
@@ -306,10 +317,11 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     
     private void loadItems() {
         StringBuilder headerBuilder = new StringBuilder();
-        List<com.example.appdevelopmentprojectfinal.calendar.Event> filteredEvents = new ArrayList<>();
+        List<Event> allEvents = DataManager.getInstance().getAllEvents();
+        List<Event> filteredEvents = new ArrayList<>();
         
         // Filter events based on the selected tab and date
-        for (com.example.appdevelopmentprojectfinal.calendar.Event event : allEvents) {
+        for (Event event : allEvents) {
             // Check if event is on the selected date for Todo and Events tabs
             boolean isOnSelectedDate = isSameDay(event.getDate(), new Date(selectedDate));
             
@@ -362,7 +374,7 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     }
     
     @Override
-    public void onEventClick(com.example.appdevelopmentprojectfinal.calendar.Event event, int position) {
+    public void onEventClick(Event event, int position) {
         // Display event details or edit event
         showEventDetailsDialog(event, position);
     }
@@ -395,19 +407,40 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         builder.setPositiveButton("Edit", (dialog, which) -> showEditEventDialog(event, position));
         
         builder.setNegativeButton("Delete", (dialog, which) -> {
-            // Delete event
-            allEvents.remove(position);
-            
-            // Update event markers on calendar
-            updateCalendarEvents();
-            
-            loadItems();
+            // Delete event from Firebase
+            deleteEventFromFirebase(event);
         });
         
         builder.setNeutralButton("Close", (dialog, which) -> dialog.dismiss());
         
         // Show dialog
         builder.create().show();
+    }
+    
+    private void deleteEventFromFirebase(Event event) {
+        DataManager.getInstance().deleteEvent(event, new DataManager.OnEventDeletedListener() {
+            @Override
+            public void onEventDeleted() {
+                // Update event markers on calendar
+                updateCalendarEvents();
+                
+                // Refresh display
+                loadItems();
+                
+                // Show success message
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Event deleted successfully", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error deleting event: " + error);
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Error deleting event: " + error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
     
     private void showEditEventDialog(Event event, int position) {
@@ -420,6 +453,9 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         builder.setView(dialogView);
         
         // Find views in dialog
+        RadioGroup radioGroupType = dialogView.findViewById(R.id.radioGroup_type);
+        RadioButton radioButtonEvent = dialogView.findViewById(R.id.radioButton_event);
+        RadioButton radioButtonTodo = dialogView.findViewById(R.id.radioButton_todo);
         EditText editTextTitle = dialogView.findViewById(R.id.editText_title);
         EditText editTextDescription = dialogView.findViewById(R.id.editText_description);
         TextView textViewDate = dialogView.findViewById(R.id.textView_date);
@@ -428,6 +464,13 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         // Set initial values from event
         editTextTitle.setText(event.getTitle());
         editTextDescription.setText(event.getDescription());
+        
+        // Set event type radio button
+        if (event.getType() == Event.TYPE_EVENT) {
+            radioButtonEvent.setChecked(true);
+        } else {
+            radioButtonTodo.setChecked(true);
+        }
         
         // Set up calendar with event date
         Calendar eventCal = Calendar.getInstance();
@@ -482,16 +525,21 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
             String description = editTextDescription.getText().toString().trim();
             
             if (title.isEmpty()) {
+                Toast.makeText(getContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
+            
+            // Update event type
+            int eventType = radioButtonEvent.isChecked() ? Event.TYPE_EVENT : Event.TYPE_TODO;
             
             // Update event
             event.setTitle(title);
             event.setDescription(description);
+            event.setType(eventType);
             event.setDate(eventCal.getTime());
             
-            // Refresh display
-            loadItems();
+            // Save to Firebase
+            saveEventToFirebase(event);
         });
         
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -508,6 +556,7 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         customCalendarView.clearEvents();
         
         // Add markers for all events
+        List<Event> allEvents = DataManager.getInstance().getAllEvents();
         for (Event event : allEvents) {
             Calendar calendar = getCalendarFromDate(event.getDate());
             if (event.getType() == Event.TYPE_EVENT) {
@@ -530,7 +579,8 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     @Override
     public void onResume() {
         super.onResume();
-        // Update calendar events whenever the fragment resumes
+        // Update calendar events when fragment resumes
+        loadItems();
         updateCalendarEvents();
     }
 } 

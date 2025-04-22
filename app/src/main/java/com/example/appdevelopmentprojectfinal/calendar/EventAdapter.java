@@ -85,20 +85,32 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
      * Get countdown text
      */
     private String getCountdownText(Date eventDate) {
+        Calendar now = Calendar.getInstance();
+        
+        Calendar eventCal = Calendar.getInstance();
+        eventCal.setTime(eventDate);
+        
+        // 检查事件是否在今天但已过期
+        if (isSameDay(eventCal, Calendar.getInstance()) && 
+            eventDate.getTime() < System.currentTimeMillis()) {
+            return context.getString(R.string.past);
+        }
+        
+        // 日期比较
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
         today.set(Calendar.MILLISECOND, 0);
         
-        Calendar eventCal = Calendar.getInstance();
-        eventCal.setTime(eventDate);
-        eventCal.set(Calendar.HOUR_OF_DAY, 0);
-        eventCal.set(Calendar.MINUTE, 0);
-        eventCal.set(Calendar.SECOND, 0);
-        eventCal.set(Calendar.MILLISECOND, 0);
+        Calendar eventDateOnly = Calendar.getInstance();
+        eventDateOnly.setTime(eventDate);
+        eventDateOnly.set(Calendar.HOUR_OF_DAY, 0);
+        eventDateOnly.set(Calendar.MINUTE, 0);
+        eventDateOnly.set(Calendar.SECOND, 0);
+        eventDateOnly.set(Calendar.MILLISECOND, 0);
         
-        long diffInMillis = eventCal.getTimeInMillis() - today.getTimeInMillis();
+        long diffInMillis = eventDateOnly.getTimeInMillis() - today.getTimeInMillis();
         long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
         
         if (diffInDays < 0) {
@@ -116,6 +128,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
      * Set countdown text color based on date
      */
     private void setCountdownColor(TextView textView, Date eventDate) {
+        // 检查事件是否在今天但已过期
+        if (isSameDay(getCalendarFromDate(eventDate), Calendar.getInstance()) && 
+            eventDate.getTime() < System.currentTimeMillis()) {
+            // 今天的已过期事件 - 灰色
+            textView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+            return;
+        }
+        
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
         today.set(Calendar.MINUTE, 0);
@@ -145,6 +165,24 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             // More than 3 days - Blue
             textView.setTextColor(context.getResources().getColor(android.R.color.holo_blue_dark));
         }
+    }
+    
+    /**
+     * 判断两个Calendar对象是否为同一天
+     */
+    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+               cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+               cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
+    }
+    
+    /**
+     * 将Date转换为Calendar
+     */
+    private Calendar getCalendarFromDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
     }
     
     @Override

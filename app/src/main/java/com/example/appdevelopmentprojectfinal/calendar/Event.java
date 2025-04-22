@@ -1,6 +1,7 @@
 package com.example.appdevelopmentprojectfinal.calendar;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Represents a calendar event with a title, description, date, and type.
@@ -10,13 +11,20 @@ public class Event {
     public static final int TYPE_EVENT = 0;
     public static final int TYPE_TODO = 1;
     
+    private String id;
+    private String userId;
     private String title;
     private String description;
     private Date date;
     private int type; // 0 for event, 1 for todo
     private boolean isCompleted; // for todo items only
     
+    public Event() {
+        // Empty constructor required for Firebase deserialization
+    }
+    
     public Event(String title, String description, Date date, int type) {
+        this.id = UUID.randomUUID().toString();
         this.title = title;
         this.description = description;
         this.date = date;
@@ -25,6 +33,22 @@ public class Event {
     }
     
     // Getters and setters
+    
+    public String getId() {
+        return id;
+    }
+    
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    public String getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
     
     public String getTitle() {
         return title;
