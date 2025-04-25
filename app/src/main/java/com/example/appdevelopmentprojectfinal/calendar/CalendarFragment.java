@@ -36,6 +36,7 @@ import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.Collections;
 
 public class CalendarFragment extends Fragment implements EventAdapter.OnEventClickListener {
     private static final String TAG = "TimetableApp:CalendarFragment";
@@ -381,6 +382,27 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
             } else if (currentTab == 2) {
                 filteredEvents.add(event);
             }
+        }
+        
+        // If showing "All", sort events by time remaining (closest to expiration first)
+        if (currentTab == 2) {
+            Collections.sort(filteredEvents, (event1, event2) -> {
+                // Special case: if either event is completed, put completed ones at the end
+                if (event1.isTodo() && event2.isTodo()) {
+                    if (event1.isCompleted() && !event2.isCompleted()) {
+                        return 1; // event1 (completed) goes after event2 (not completed)
+                    }
+                    if (!event1.isCompleted() && event2.isCompleted()) {
+                        return -1; // event1 (not completed) goes before event2 (completed)
+                    }
+                    if (event1.isCompleted() && event2.isCompleted()) {
+                        return 0; // Both completed, order doesn't matter
+                    }
+                }
+                
+                // For non-completed events or regular events, sort by date
+                return event1.getDate().compareTo(event2.getDate());
+            });
         }
         
         // Update adapter with filtered events
