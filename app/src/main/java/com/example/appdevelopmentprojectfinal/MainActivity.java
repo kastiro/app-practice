@@ -70,11 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
-
-        // JSON Internal Storage
-        JsonUtil jsonUtil = new JsonUtil();
-        jsonUtil.copyFileToInternalStorageIfNeeded(this, "timetable.json");
-
     }
 
     private void replaceFragment(Fragment fragment) {

@@ -3,10 +3,13 @@ package com.example.appdevelopmentprojectfinal.timetable;
 import androidx.annotation.NonNull;
 
 public class TimeSlot {
-    private final String day;
-    private final String startTime;
-    private final String endTime;
-    private final String location;
+    private String day;
+    private String startTime;
+    private String endTime;
+    private String location;
+
+    public TimeSlot() {
+    }
 
     public TimeSlot(String day, String startTime, String endTime, String location) {
         this.day = day;

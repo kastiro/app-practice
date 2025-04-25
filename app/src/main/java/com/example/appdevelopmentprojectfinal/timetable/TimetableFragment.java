@@ -29,6 +29,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevelopmentprojectfinal.R;
 import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +45,6 @@ import java.util.Map;
 import android.content.Context;
 
 public class TimetableFragment extends Fragment implements ModuleManagementAdapter.OnModuleVisibilityChangedListener {
-    private static final String TIMETABLE_FILENAME = "timetable.json";
 
     private final List<ModuleSchedule> moduleSchedules = new ArrayList<>();
     private TableLayout timetableGrid;
@@ -372,18 +373,93 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     throw new RuntimeException(e);
                 }
                 dialog.dismiss();
+
+                SaveModuleDetails(module);
             });
         });
 
 
 
-        loadTimetableData();
+        //loadTimetableData();
 
         moduleAdapter = new ModuleManagementAdapter(moduleSchedules, this);
         moduleListView.setAdapter(moduleAdapter);
 
+        LoadModuleDetails();
         displayTimetable();
     }
+
+    private void SaveModuleDetails(Module module) {
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.collection("modules")
+                .document() // creates a new document reference with a random ID
+                .set(module)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(requireContext(), "Timetable data saved", Toast.LENGTH_SHORT).show();
+                    LoadModuleDetails();
+                })
+                .addOnFailureListener(exception -> {
+                    Toast.makeText(requireContext(), "Failed to save timetable data", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void LoadModuleDetails() {
+        if (isAdded()) {
+            // Clear existing data first
+            moduleSchedules.clear();
+
+            FirebaseFirestore database = FirebaseFirestore.getInstance();
+            // Instead of accessing a single document, you need to get all modules
+            database.collection("modules").get().addOnSuccessListener(queryDocumentSnapshots -> {
+                if (isAdded()) {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (DocumentSnapshot document : queryDocumentSnapshots) {
+                            Module module = document.toObject(Module.class);
+                            if (module != null) {
+                                // Now for each module, get its timeslots from the module object
+                                List<TimeSlot> timeSlots = module.getTimeSlotList();
+                                if (timeSlots != null) {
+                                    for (TimeSlot timeSlot : timeSlots) {
+                                        // Create a ModuleSchedule for each time slot
+                                        boolean isMovable = true; // Set according to your data
+                                        ModuleSchedule schedule = new ModuleSchedule(
+                                                module,
+                                                timeSlot,
+                                                isMovable,
+                                                module.isShow());
+
+                                        // Add to the master list
+                                        moduleSchedules.add(schedule);
+                                    }
+                                }
+                            }
+                        }
+
+
+
+
+                        // Recreate adapter with fresh data
+                        moduleAdapter = new ModuleManagementAdapter(moduleSchedules, TimetableFragment.this);
+                        moduleListView.setAdapter(moduleAdapter);
+
+                        // Refresh the timetable grid
+                        displayTimetable();
+                    } else {
+                        // Handle empty data case
+                        emptyView.setVisibility(View.VISIBLE);
+                    }
+                }
+            }).addOnFailureListener(e -> {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), "Failed to load timetable data: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    Log.e("TimetableFragment", "Error loading modules", e);
+                }
+            });
+        }
+    }
+
+
 
     private TimeSlot readSlotLayout(LinearLayout slotLayout) {
         String day = "";
@@ -438,14 +514,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         return new TimeSlot(day, startTime, endTime, location);
     }
 
-    public boolean isValidDayOfWeek(String day) {
-        try {
-            DayOfWeek.valueOf(day.toUpperCase());
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
+
 
     private void addModule(Module module) throws JSONException {
         Log.d("ModuleEntry", module.toString());
@@ -602,82 +671,5 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
 
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
-    }
-
-    private void loadTimetableData() {
-        try {
-            String jsonString = loadJSONFromAsset();
-            if (jsonString == null) {
-                Log.e("TimetableFragment", "Failed to load timetable JSON");
-                Toast.makeText(requireContext(), "Failed to load timetable data", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            JSONObject jsonObject = new JSONObject(jsonString);
-            JSONArray modulesArray = jsonObject.getJSONArray("modules");
-
-            moduleSchedules.clear();
-
-            for (int i = 0; i < modulesArray.length(); i++) {
-                JSONObject moduleObj = modulesArray.getJSONObject(i);
-
-                Module module = new Module(
-                        moduleObj.getString("code"),
-                        moduleObj.getString("name"),
-                        moduleObj.getString("lecturer"),
-                        Boolean.parseBoolean(moduleObj.getString("show"))
-                );
-                module.setType(moduleObj.getString("type"));
-
-                JSONArray alternativeSlotsArray = moduleObj.getJSONArray("alternativeSlots");
-                for (int j = 0; j < alternativeSlotsArray.length(); j++) {
-                    JSONObject alternativeSlotsArrayJSONObject = alternativeSlotsArray.getJSONObject(j);
-
-                    TimeSlot alternativeTimeSlot = new TimeSlot(
-                            alternativeSlotsArrayJSONObject.getString("day"),
-                            alternativeSlotsArrayJSONObject.getString("startTime"),
-                            alternativeSlotsArrayJSONObject.getString("endTime"),
-                            alternativeSlotsArrayJSONObject.getString("location")
-                    );
-
-                    module.getAlternativeSlots().add(alternativeTimeSlot);
-                }
-
-                JSONArray slotsArray = moduleObj.getJSONArray("slots");
-                for (int j = 0; j < slotsArray.length(); j++) {
-                    JSONObject slotObj = slotsArray.getJSONObject(j);
-
-                    TimeSlot timeSlot = new TimeSlot(
-                            slotObj.getString("day"),
-                            slotObj.getString("startTime"),
-                            slotObj.getString("endTime"),
-                            slotObj.getString("location")
-                    );
-
-                    boolean isMovable = slotObj.getBoolean("isMovable");
-                    module.getTimeSlotList().add(timeSlot);
-                    Log.d("ModuleEntry", module.toString());
-
-                    moduleSchedules.add(new ModuleSchedule(module, timeSlot, isMovable, module.isShow()));
-                }
-            }
-
-            Log.d("TimetableFragment", "Loaded " + moduleSchedules.size() + " module schedules");
-
-        } catch (JSONException e) {
-            Log.e("TimetableFragment", "JSON parsing error: " + e.getMessage());
-            Toast.makeText(requireContext(), "Error parsing timetable data", Toast.LENGTH_SHORT).show();
-
-            Log.i("TimetableFragment", "Trying to copy file to internal storage...");
-            JsonUtil jsonUtil = new JsonUtil();
-            jsonUtil.copyFileFromAssetsToInternalStorage(requireContext(), TIMETABLE_FILENAME);
-            loadTimetableData();
-        }
-    }
-
-    private String loadJSONFromAsset() {
-        JsonUtil jsonUtil = new JsonUtil();
-        Context tempContext = requireContext();
-        return jsonUtil.readFileFromInternalStorage(tempContext);
     }
 }

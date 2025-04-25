@@ -5,18 +5,23 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class    Module {
-    private final String code;
-    private final String name;
-    private final String lecturer;
+public class Module {
+    private String code;
+    private String name;
+    private String lecturer;
 
-    private final boolean show;
+    private boolean show;
 
     private String type;
 
     private List<TimeSlot> timeSlotList;
 
     private List<TimeSlot> alternativeSlots;
+
+
+    public Module() {
+
+    }
 
     public Module(String code, String name, String lecturer, boolean show) {
         this.code = code;
