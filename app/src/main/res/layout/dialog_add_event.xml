@@ -35,13 +35,30 @@
         android:textColor="#757575"
         android:layout_marginBottom="4dp" />
 
-    <EditText
-        android:id="@+id/editText_title"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter title"
-        android:inputType="text"
-        android:layout_marginBottom="12dp" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/editText_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Enter title"
+            android:inputType="text" />
+
+        <ImageView
+            android:id="@+id/imageView_title_warning"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:src="@android:drawable/ic_dialog_alert"
+            android:tint="#FF0000"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"

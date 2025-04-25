@@ -11,10 +11,18 @@
     <string name="events">Events</string>
     <string name="todo">To-Do</string>
     <string name="all">All</string>
+    <string name="all_tasks">All Tasks</string>
     <string name="past">Expired</string>
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="days">days</string>
+    <string name="completed">Completed</string>
+    <string name="hours">hours</string>
+    <string name="hour">hour</string>
+    <string name="minutes">minutes</string>
+    <string name="minute">minute</string>
+    <string name="day_singular">day</string>
+    <string name="soon">Coming soon</string>
 
     <item name="calendar" type="id" />
     

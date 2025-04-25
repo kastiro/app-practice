@@ -12,7 +12,9 @@ import android.graphics.Color;
 import android.widget.Toast;
 import android.widget.RadioGroup;
 import android.widget.RadioButton;
+import android.widget.ImageView;
 import android.util.Log;
+import android.content.DialogInterface;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -23,6 +25,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.appdevelopmentprojectfinal.R;
 import com.example.appdevelopmentprojectfinal.utils.DataManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class CalendarFragment extends Fragment implements EventAdapter.OnEventClickListener {
     private static final String TAG = "TimetableApp:CalendarFragment";
@@ -109,6 +115,16 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         recyclerViewEvents.setLayoutManager(new LinearLayoutManager(getContext()));
         eventAdapter = new EventAdapter(getContext(), new ArrayList<Event>());
         eventAdapter.setOnEventClickListener(this);
+        
+        // Add todo completion listener
+        eventAdapter.setOnTodoCompletedListener((event, isCompleted, position) -> {
+            // Update completed status
+            event.setCompleted(isCompleted);
+            
+            // Save to Firebase
+            saveEventToFirebase(event);
+        });
+        
         recyclerViewEvents.setAdapter(eventAdapter);
     }
     
@@ -175,6 +191,10 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         EditText editTextDescription = dialogView.findViewById(R.id.editText_description);
         TextView textViewDate = dialogView.findViewById(R.id.textView_date);
         TextView textViewTime = dialogView.findViewById(R.id.textView_time);
+        ImageView imageViewTitleWarning = dialogView.findViewById(R.id.imageView_title_warning);
+        
+        // Initially hide warning icon
+        imageViewTitleWarning.setVisibility(View.GONE);
         
         // Set initial date to selected date
         Calendar selectedCal = Calendar.getInstance();
@@ -191,46 +211,82 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         textViewDate.setText(dateFormat.format(selectedCal.getTime()));
         textViewTime.setText(timeFormat.format(selectedCal.getTime()));
         
-        // Set click listeners for date and time selection
+        // Set click listener for date selection - using Material Date Picker
         textViewDate.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                    (view, selectedYear, selectedMonth, selectedDay) -> {
-                        year[0] = selectedYear;
-                        month[0] = selectedMonth;
-                        day[0] = selectedDay;
-                        
-                        // Update calendar and display
-                        selectedCal.set(Calendar.YEAR, year[0]);
-                        selectedCal.set(Calendar.MONTH, month[0]);
-                        selectedCal.set(Calendar.DAY_OF_MONTH, day[0]);
-                        textViewDate.setText(dateFormat.format(selectedCal.getTime()));
-                    }, year[0], month[0], day[0]);
-            datePickerDialog.show();
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Date")
+                .setSelection(selectedCal.getTimeInMillis())
+                .build();
+            
+            datePicker.addOnPositiveButtonClickListener(selection -> {
+                // Adjust for time zone
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(selection);
+                calendar.setTimeZone(TimeZone.getDefault());
+                
+                // Keep time from previous selection
+                calendar.set(Calendar.HOUR_OF_DAY, hour[0]);
+                calendar.set(Calendar.MINUTE, minute[0]);
+                
+                // Update values
+                year[0] = calendar.get(Calendar.YEAR);
+                month[0] = calendar.get(Calendar.MONTH);
+                day[0] = calendar.get(Calendar.DAY_OF_MONTH);
+                selectedCal.set(Calendar.YEAR, year[0]);
+                selectedCal.set(Calendar.MONTH, month[0]);
+                selectedCal.set(Calendar.DAY_OF_MONTH, day[0]);
+                
+                textViewDate.setText(dateFormat.format(calendar.getTime()));
+            });
+            
+            datePicker.show(getParentFragmentManager(), "DATE_PICKER");
         });
         
+        // Set click listener for time selection - using Material Time Picker
         textViewTime.setOnClickListener(v -> {
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                    (view, selectedHour, selectedMinute) -> {
-                        hour[0] = selectedHour;
-                        minute[0] = selectedMinute;
-                        
-                        // Update calendar and display
-                        selectedCal.set(Calendar.HOUR_OF_DAY, hour[0]);
-                        selectedCal.set(Calendar.MINUTE, minute[0]);
-                        textViewTime.setText(timeFormat.format(selectedCal.getTime()));
-                    }, hour[0], minute[0], false);
-            timePickerDialog.show();
+            MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(hour[0])
+                .setMinute(minute[0])
+                .setTitleText("Select Time")
+                .build();
+            
+            timePicker.addOnPositiveButtonClickListener(view -> {
+                hour[0] = timePicker.getHour();
+                minute[0] = timePicker.getMinute();
+                
+                selectedCal.set(Calendar.HOUR_OF_DAY, hour[0]);
+                selectedCal.set(Calendar.MINUTE, minute[0]);
+                
+                textViewTime.setText(timeFormat.format(selectedCal.getTime()));
+            });
+            
+            timePicker.show(getParentFragmentManager(), "TIME_PICKER");
         });
+        
+        // Create AlertDialog
+        AlertDialog dialog = builder.create();
         
         // Add action buttons
-        builder.setPositiveButton("Save", (dialog, which) -> {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save", (DialogInterface.OnClickListener) null);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", (dialog1, which) -> dialog1.cancel());
+        
+        dialog.show();
+        
+        // Override the positive button click to handle validation without dismissing dialog
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
             // Validate input
             String title = editTextTitle.getText().toString().trim();
             String description = editTextDescription.getText().toString().trim();
             
             if (title.isEmpty()) {
-                Toast.makeText(getContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show();
+                // Show warning icon
+                imageViewTitleWarning.setVisibility(View.VISIBLE);
+                // Don't dismiss dialog
                 return;
+            } else {
+                // Hide warning icon if previously shown
+                imageViewTitleWarning.setVisibility(View.GONE);
             }
             
             // Check if event or todo is selected
@@ -241,38 +297,31 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
             
             // Save to Firebase
             saveEventToFirebase(newItem);
+            
+            // Dismiss the dialog
+            dialog.dismiss();
         });
-        
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-        
-        // Show dialog
-        builder.create().show();
     }
     
     private void saveEventToFirebase(Event event) {
-        DataManager.getInstance().saveEvent(event, new DataManager.OnEventSavedListener() {
+        // Use CalendarHelper instead of direct DataManager call
+        CalendarHelper.saveEvent(requireContext(), event, new CalendarHelper.OnEventOperationListener() {
             @Override
-            public void onEventSaved(Event savedEvent) {
+            public void onSuccess() {
                 // Update event markers on calendar
-                Calendar calendar = getCalendarFromDate(savedEvent.getDate());
-                int type = savedEvent.getType() == Event.TYPE_EVENT ? 
+                Calendar calendar = getCalendarFromDate(event.getDate());
+                int type = event.getType() == Event.TYPE_EVENT ? 
                     CustomCalendarView.TYPE_EVENT : CustomCalendarView.TYPE_TODO;
                 customCalendarView.addEvent(calendar, type);
                 
                 // Refresh display
                 loadItems();
-                
-                // Show success message
-                if (getContext() != null) {
-                    Toast.makeText(getContext(), "Event saved successfully", Toast.LENGTH_SHORT).show();
-                }
             }
 
             @Override
-            public void onError(String error) {
-                Log.e(TAG, "Error saving event: " + error);
+            public void onError(String errorMessage) {
                 if (getContext() != null) {
-                    Toast.makeText(getContext(), "Error saving event: " + error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error saving event: " + errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -346,7 +395,7 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
                 headerBuilder.append(getString(R.string.events));
                 break;
             case 2:
-                headerBuilder.append("All Task");
+                headerBuilder.append(getString(R.string.all_tasks));
                 break;
         }
         
@@ -418,26 +467,21 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     }
     
     private void deleteEventFromFirebase(Event event) {
-        DataManager.getInstance().deleteEvent(event, new DataManager.OnEventDeletedListener() {
+        // Use CalendarHelper instead of direct DataManager call
+        CalendarHelper.deleteEvent(requireContext(), event, new CalendarHelper.OnEventOperationListener() {
             @Override
-            public void onEventDeleted() {
+            public void onSuccess() {
                 // Update event markers on calendar
                 updateCalendarEvents();
                 
                 // Refresh display
                 loadItems();
-                
-                // Show success message
-                if (getContext() != null) {
-                    Toast.makeText(getContext(), "Event deleted successfully", Toast.LENGTH_SHORT).show();
-                }
             }
 
             @Override
-            public void onError(String error) {
-                Log.e(TAG, "Error deleting event: " + error);
+            public void onError(String errorMessage) {
                 if (getContext() != null) {
-                    Toast.makeText(getContext(), "Error deleting event: " + error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error deleting event: " + errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -460,6 +504,10 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         EditText editTextDescription = dialogView.findViewById(R.id.editText_description);
         TextView textViewDate = dialogView.findViewById(R.id.textView_date);
         TextView textViewTime = dialogView.findViewById(R.id.textView_time);
+        ImageView imageViewTitleWarning = dialogView.findViewById(R.id.imageView_title_warning);
+        
+        // Initially hide warning icon
+        imageViewTitleWarning.setVisibility(View.GONE);
         
         // Set initial values from event
         editTextTitle.setText(event.getTitle());
@@ -487,46 +535,82 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
         textViewDate.setText(dateFormat.format(eventCal.getTime()));
         textViewTime.setText(timeFormat.format(eventCal.getTime()));
         
-        // Set click listeners for date and time selection
+        // Set click listener for date selection - using Material Date Picker
         textViewDate.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                    (view, selectedYear, selectedMonth, selectedDay) -> {
-                        year[0] = selectedYear;
-                        month[0] = selectedMonth;
-                        day[0] = selectedDay;
-                        
-                        // Update calendar and display
-                        eventCal.set(Calendar.YEAR, year[0]);
-                        eventCal.set(Calendar.MONTH, month[0]);
-                        eventCal.set(Calendar.DAY_OF_MONTH, day[0]);
-                        textViewDate.setText(dateFormat.format(eventCal.getTime()));
-                    }, year[0], month[0], day[0]);
-            datePickerDialog.show();
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Date")
+                .setSelection(eventCal.getTimeInMillis())
+                .build();
+            
+            datePicker.addOnPositiveButtonClickListener(selection -> {
+                // Adjust for time zone
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(selection);
+                calendar.setTimeZone(TimeZone.getDefault());
+                
+                // Keep time from previous selection
+                calendar.set(Calendar.HOUR_OF_DAY, hour[0]);
+                calendar.set(Calendar.MINUTE, minute[0]);
+                
+                // Update values
+                year[0] = calendar.get(Calendar.YEAR);
+                month[0] = calendar.get(Calendar.MONTH);
+                day[0] = calendar.get(Calendar.DAY_OF_MONTH);
+                eventCal.set(Calendar.YEAR, year[0]);
+                eventCal.set(Calendar.MONTH, month[0]);
+                eventCal.set(Calendar.DAY_OF_MONTH, day[0]);
+                
+                textViewDate.setText(dateFormat.format(calendar.getTime()));
+            });
+            
+            datePicker.show(getParentFragmentManager(), "DATE_PICKER");
         });
         
+        // Set click listener for time selection - using Material Time Picker
         textViewTime.setOnClickListener(v -> {
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                    (view, selectedHour, selectedMinute) -> {
-                        hour[0] = selectedHour;
-                        minute[0] = selectedMinute;
-                        
-                        // Update calendar and display
-                        eventCal.set(Calendar.HOUR_OF_DAY, hour[0]);
-                        eventCal.set(Calendar.MINUTE, minute[0]);
-                        textViewTime.setText(timeFormat.format(eventCal.getTime()));
-                    }, hour[0], minute[0], false);
-            timePickerDialog.show();
+            MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(hour[0])
+                .setMinute(minute[0])
+                .setTitleText("Select Time")
+                .build();
+            
+            timePicker.addOnPositiveButtonClickListener(view -> {
+                hour[0] = timePicker.getHour();
+                minute[0] = timePicker.getMinute();
+                
+                eventCal.set(Calendar.HOUR_OF_DAY, hour[0]);
+                eventCal.set(Calendar.MINUTE, minute[0]);
+                
+                textViewTime.setText(timeFormat.format(eventCal.getTime()));
+            });
+            
+            timePicker.show(getParentFragmentManager(), "TIME_PICKER");
         });
+        
+        // Create AlertDialog
+        AlertDialog dialog = builder.create();
         
         // Add action buttons
-        builder.setPositiveButton("Save", (dialog, which) -> {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save", (DialogInterface.OnClickListener) null);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", (dialog1, which) -> dialog1.cancel());
+        
+        dialog.show();
+        
+        // Override the positive button click to handle validation without dismissing dialog
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
             // Validate input
             String title = editTextTitle.getText().toString().trim();
             String description = editTextDescription.getText().toString().trim();
             
             if (title.isEmpty()) {
-                Toast.makeText(getContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show();
+                // Show warning icon
+                imageViewTitleWarning.setVisibility(View.VISIBLE);
+                // Don't dismiss dialog
                 return;
+            } else {
+                // Hide warning icon if previously shown
+                imageViewTitleWarning.setVisibility(View.GONE);
             }
             
             // Update event type
@@ -540,12 +624,10 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
             
             // Save to Firebase
             saveEventToFirebase(event);
+            
+            // Dismiss the dialog
+            dialog.dismiss();
         });
-        
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-        
-        // Show dialog
-        builder.create().show();
     }
     
     /**
@@ -579,8 +661,14 @@ public class CalendarFragment extends Fragment implements EventAdapter.OnEventCl
     @Override
     public void onResume() {
         super.onResume();
-        // Update calendar events when fragment resumes
-        loadItems();
+        
+        // Load events from both local storage and Firebase
+        CalendarHelper.loadAllEvents(requireContext());
+        
+        // Update calendar display
         updateCalendarEvents();
+        
+        // Load event list
+        loadItems();
     }
 } 

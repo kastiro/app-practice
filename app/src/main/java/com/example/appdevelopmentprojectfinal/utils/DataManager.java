@@ -556,6 +556,33 @@ private void loadModulesFromAsset(Context context) {
         return false;
     }
 
+    /**
+     * Add events loaded from local storage
+     */
+    public void addLocalEvents(List<Event> localEvents) {
+        if (localEvents == null || localEvents.isEmpty()) {
+            return;
+        }
+        
+        for (Event localEvent : localEvents) {
+            boolean exists = false;
+            
+            for (Event existingEvent : events) {
+                if (existingEvent.getId().equals(localEvent.getId())) {
+                    exists = true;
+                    break;
+                }
+            }
+            
+            if (!exists) {
+                events.add(localEvent);
+                Log.d(TAG, "Added local event to memory: " + localEvent.getTitle());
+            }
+        }
+        
+        Log.d(TAG, "Total events after adding local: " + events.size());
+    }
+
     public interface OnUserLoadedListener {
         void onUserLoaded(User user);
         void onError(String error);

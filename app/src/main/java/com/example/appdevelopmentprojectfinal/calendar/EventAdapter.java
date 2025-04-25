@@ -1,9 +1,12 @@
 package com.example.appdevelopmentprojectfinal.calendar;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -27,9 +30,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     private Context context;
     private SimpleDateFormat dateFormat;
     private OnEventClickListener listener;
+    private OnTodoCompletedListener todoCompletedListener;
     
     public interface OnEventClickListener {
         void onEventClick(com.example.appdevelopmentprojectfinal.calendar.Event event, int position);
+    }
+    
+    public interface OnTodoCompletedListener {
+        void onTodoCompleted(com.example.appdevelopmentprojectfinal.calendar.Event event, boolean isCompleted, int position);
     }
     
     public EventAdapter(Context context, List<com.example.appdevelopmentprojectfinal.calendar.Event> events) {
@@ -40,6 +48,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     
     public void setOnEventClickListener(OnEventClickListener listener) {
         this.listener = listener;
+    }
+    
+    public void setOnTodoCompletedListener(OnTodoCompletedListener listener) {
+        this.todoCompletedListener = listener;
     }
     
     @NonNull
@@ -57,20 +69,98 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.descriptionTextView.setText(event.getDescription());
         holder.timeTextView.setText(dateFormat.format(event.getDate()));
         
-        // Calculate and display countdown
-        String countdownText = getCountdownText(event.getDate());
-        holder.countdownTextView.setText(countdownText);
-        
-        // Set countdown text color
-        setCountdownColor(holder.countdownTextView, event.getDate());
-        
-        // Set the color of the left indicator based on event type
+        // Set the color of the left indicator based on event type and completion status
         if (event.isTodo()) {
-            // Orange for TODO
-            holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_orange_light));
+            if (event.isCompleted()) {
+                // Completed TODO - Grey
+                holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.darker_gray));
+                holder.countdownTextView.setText(context.getString(R.string.completed));
+                holder.countdownTextView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+            } else {
+                // Incomplete TODO - Orange
+                holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_orange_light));
+                
+                // Calculate and display countdown
+                String countdownText = getDetailedCountdownText(event.getDate());
+                holder.countdownTextView.setText(countdownText);
+                
+                // Set countdown text color
+                setCountdownColor(holder.countdownTextView, event.getDate());
+            }
+            
+            // Show checkbox for todos
+            holder.completedCheckBox.setVisibility(View.VISIBLE);
+            holder.completedCheckBox.setChecked(event.isCompleted());
+            
+            // Apply strikethrough text for completed todos
+            if (event.isCompleted()) {
+                holder.titleTextView.setPaintFlags(holder.titleTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                holder.descriptionTextView.setPaintFlags(holder.descriptionTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                holder.titleTextView.setTextColor(Color.GRAY);
+                holder.descriptionTextView.setTextColor(Color.GRAY);
+                holder.timeTextView.setTextColor(Color.GRAY);
+            } else {
+                holder.titleTextView.setPaintFlags(holder.titleTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                holder.descriptionTextView.setPaintFlags(holder.descriptionTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                holder.titleTextView.setTextColor(Color.BLACK);
+                holder.descriptionTextView.setTextColor(Color.BLACK);
+                holder.timeTextView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+            }
+            
+            // Setup checkbox listener
+            holder.completedCheckBox.setOnClickListener(v -> {
+                boolean isChecked = holder.completedCheckBox.isChecked();
+                
+                // Update UI
+                if (isChecked) {
+                    holder.titleTextView.setPaintFlags(holder.titleTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    holder.descriptionTextView.setPaintFlags(holder.descriptionTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    holder.titleTextView.setTextColor(Color.GRAY);
+                    holder.descriptionTextView.setTextColor(Color.GRAY);
+                    holder.timeTextView.setTextColor(Color.GRAY);
+                    holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.darker_gray));
+                    holder.countdownTextView.setText(context.getString(R.string.completed));
+                    holder.countdownTextView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                } else {
+                    holder.titleTextView.setPaintFlags(holder.titleTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    holder.descriptionTextView.setPaintFlags(holder.descriptionTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    holder.titleTextView.setTextColor(Color.BLACK);
+                    holder.descriptionTextView.setTextColor(Color.BLACK);
+                    holder.timeTextView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                    holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_orange_light));
+                    
+                    // Calculate and display countdown
+                    String countdownText = getDetailedCountdownText(event.getDate());
+                    holder.countdownTextView.setText(countdownText);
+                    
+                    // Set countdown text color
+                    setCountdownColor(holder.countdownTextView, event.getDate());
+                }
+                
+                // Notify listener
+                if (todoCompletedListener != null) {
+                    todoCompletedListener.onTodoCompleted(event, isChecked, holder.getAdapterPosition());
+                }
+            });
         } else {
-            // Red for EVENT
+            // Event - Red
             holder.typeIndicator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
+            
+            // Hide checkbox for events
+            holder.completedCheckBox.setVisibility(View.GONE);
+            
+            // Remove any strikethrough
+            holder.titleTextView.setPaintFlags(holder.titleTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.descriptionTextView.setPaintFlags(holder.descriptionTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.titleTextView.setTextColor(Color.BLACK);
+            holder.descriptionTextView.setTextColor(Color.BLACK);
+            
+            // Calculate and display countdown
+            String countdownText = getDetailedCountdownText(event.getDate());
+            holder.countdownTextView.setText(countdownText);
+            
+            // Set countdown text color
+            setCountdownColor(holder.countdownTextView, event.getDate());
         }
         
         // Setup click listeners
@@ -82,45 +172,72 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     }
     
     /**
-     * Get countdown text
+     * Get detailed countdown text including hours and minutes when appropriate
      */
-    private String getCountdownText(Date eventDate) {
+    private String getDetailedCountdownText(Date eventDate) {
         Calendar now = Calendar.getInstance();
         
-        Calendar eventCal = Calendar.getInstance();
-        eventCal.setTime(eventDate);
-        
-        // 检查事件是否在今天但已过期
-        if (isSameDay(eventCal, Calendar.getInstance()) && 
-            eventDate.getTime() < System.currentTimeMillis()) {
+        // If date is in the past, just show "Expired"
+        if (eventDate.getTime() < now.getTimeInMillis()) {
             return context.getString(R.string.past);
         }
         
-        // 日期比较
-        Calendar today = Calendar.getInstance();
-        today.set(Calendar.HOUR_OF_DAY, 0);
-        today.set(Calendar.MINUTE, 0);
-        today.set(Calendar.SECOND, 0);
-        today.set(Calendar.MILLISECOND, 0);
+        // Calculate time difference in milliseconds
+        long diffInMillis = eventDate.getTime() - now.getTimeInMillis();
         
-        Calendar eventDateOnly = Calendar.getInstance();
-        eventDateOnly.setTime(eventDate);
-        eventDateOnly.set(Calendar.HOUR_OF_DAY, 0);
-        eventDateOnly.set(Calendar.MINUTE, 0);
-        eventDateOnly.set(Calendar.SECOND, 0);
-        eventDateOnly.set(Calendar.MILLISECOND, 0);
+        // Convert to days, hours, minutes
+        long days = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        long hours = TimeUnit.MILLISECONDS.toHours(diffInMillis) - TimeUnit.DAYS.toHours(days);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(diffInMillis));
         
-        long diffInMillis = eventDateOnly.getTimeInMillis() - today.getTimeInMillis();
-        long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
-        
-        if (diffInDays < 0) {
-            return context.getString(R.string.past);
-        } else if (diffInDays == 0) {
-            return context.getString(R.string.today);
-        } else if (diffInDays == 1) {
-            return context.getString(R.string.tomorrow);
+        // Format countdown text based on time remaining
+        if (days > 0) {
+            if (days >= 30) {
+                // For distant events, just show days
+                return days + " " + context.getString(R.string.days);
+            } else if (days >= 2) {
+                // For events more than 2 days away, show days and hours
+                return days + " " + context.getString(R.string.days) + " " + hours + " " + context.getString(R.string.hours);
+            } else {
+                if (days == 1) {
+                    if (hours == 1) {
+                        return days + " " + context.getString(R.string.day_singular) + " " + hours + " " + context.getString(R.string.hour);
+                    } else {
+                        return days + " " + context.getString(R.string.day_singular) + " " + hours + " " + context.getString(R.string.hours);
+                    }
+                } else {
+                    if (hours == 1) {
+                        return days + " " + context.getString(R.string.days) + " " + hours + " " + context.getString(R.string.hour);
+                    } else {
+                        return days + " " + context.getString(R.string.days) + " " + hours + " " + context.getString(R.string.hours);
+                    }
+                }
+            }
+        } else if (hours > 0) {
+            // Within the same day, but more than an hour
+            if (hours == 1) {
+                if (minutes == 1) {
+                    return hours + " " + context.getString(R.string.hour) + " " + minutes + " " + context.getString(R.string.minute);
+                } else {
+                    return hours + " " + context.getString(R.string.hour) + " " + minutes + " " + context.getString(R.string.minutes);
+                }
+            } else {
+                if (minutes == 1) {
+                    return hours + " " + context.getString(R.string.hours) + " " + minutes + " " + context.getString(R.string.minute);
+                } else {
+                    return hours + " " + context.getString(R.string.hours) + " " + minutes + " " + context.getString(R.string.minutes);
+                }
+            }
+        } else if (minutes > 0) {
+            // Less than an hour
+            if (minutes == 1) {
+                return minutes + " " + context.getString(R.string.minute);
+            } else {
+                return minutes + " " + context.getString(R.string.minutes);
+            }
         } else {
-            return diffInDays + " " + context.getString(R.string.days);
+            // Less than a minute
+            return context.getString(R.string.soon);
         }
     }
     
@@ -128,47 +245,37 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
      * Set countdown text color based on date
      */
     private void setCountdownColor(TextView textView, Date eventDate) {
-        // 检查事件是否在今天但已过期
-        if (isSameDay(getCalendarFromDate(eventDate), Calendar.getInstance()) && 
-            eventDate.getTime() < System.currentTimeMillis()) {
-            // 今天的已过期事件 - 灰色
+        // Check if event is today but already expired
+        if (eventDate.getTime() < System.currentTimeMillis()) {
+            // Expired events - Gray
             textView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
             return;
         }
         
-        Calendar today = Calendar.getInstance();
-        today.set(Calendar.HOUR_OF_DAY, 0);
-        today.set(Calendar.MINUTE, 0);
-        today.set(Calendar.SECOND, 0);
-        today.set(Calendar.MILLISECOND, 0);
+        // Calculate time difference in milliseconds
+        long diffInMillis = eventDate.getTime() - System.currentTimeMillis();
         
-        Calendar eventCal = Calendar.getInstance();
-        eventCal.setTime(eventDate);
-        eventCal.set(Calendar.HOUR_OF_DAY, 0);
-        eventCal.set(Calendar.MINUTE, 0);
-        eventCal.set(Calendar.SECOND, 0);
-        eventCal.set(Calendar.MILLISECOND, 0);
+        // Convert to days, hours
+        long days = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        long hours = TimeUnit.MILLISECONDS.toHours(diffInMillis) - TimeUnit.DAYS.toHours(days);
         
-        long diffInMillis = eventCal.getTimeInMillis() - today.getTimeInMillis();
-        long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
-        
-        if (diffInDays < 0) {
-            // Expired events - Gray
-            textView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-        } else if (diffInDays <= 1) {
-            // Today or tomorrow - Red
-            textView.setTextColor(context.getResources().getColor(android.R.color.holo_red_light));
-        } else if (diffInDays <= 3) {
-            // Within 3 days - Orange
+        if (days == 0 && hours <= 3) {
+            // Within 3 hours - Red (urgent)
+            textView.setTextColor(Color.RED);
+        } else if (days == 0) {
+            // Within today - Orange
             textView.setTextColor(context.getResources().getColor(android.R.color.holo_orange_dark));
+        } else if (days <= 2) {
+            // Within 2 days - Light orange
+            textView.setTextColor(context.getResources().getColor(android.R.color.holo_orange_light));
         } else {
-            // More than 3 days - Blue
+            // More than 2 days - Blue
             textView.setTextColor(context.getResources().getColor(android.R.color.holo_blue_dark));
         }
     }
     
     /**
-     * 判断两个Calendar对象是否为同一天
+     * Check if two Calendar objects represent the same day
      */
     private boolean isSameDay(Calendar cal1, Calendar cal2) {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
@@ -177,7 +284,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     }
     
     /**
-     * 将Date转换为Calendar
+     * Convert Date to Calendar
      */
     private Calendar getCalendarFromDate(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -201,6 +308,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         TextView timeTextView;
         TextView countdownTextView;
         View typeIndicator;
+        CheckBox completedCheckBox;
         
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -209,6 +317,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             timeTextView = itemView.findViewById(R.id.tv_event_time);
             countdownTextView = itemView.findViewById(R.id.tv_event_countdown);
             typeIndicator = itemView.findViewById(R.id.view_event_type_indicator);
+            completedCheckBox = itemView.findViewById(R.id.checkbox_todo_completed);
         }
     }
 } 
