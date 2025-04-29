@@ -70,9 +70,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
             Color.parseColor("#E1BEE7")  // Light Purple
     };
 
-    public TimetableFragment() {
-        // Required empty public constructor
-    }
+    public TimetableFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -379,9 +377,6 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
         });
 
 
-
-        //loadTimetableData();
-
         moduleAdapter = new ModuleManagementAdapter(moduleSchedules, this);
         moduleListView.setAdapter(moduleAdapter);
 
@@ -405,47 +400,35 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
 
     private void LoadModuleDetails() {
         if (isAdded()) {
-            // Clear existing data first
             moduleSchedules.clear();
 
             FirebaseFirestore database = FirebaseFirestore.getInstance();
-            // Instead of accessing a single document, you need to get all modules
             database.collection("modules").get().addOnSuccessListener(queryDocumentSnapshots -> {
                 if (isAdded()) {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         for (DocumentSnapshot document : queryDocumentSnapshots) {
                             Module module = document.toObject(Module.class);
                             if (module != null) {
-                                // Now for each module, get its timeslots from the module object
                                 List<TimeSlot> timeSlots = module.getTimeSlotList();
                                 if (timeSlots != null) {
                                     for (TimeSlot timeSlot : timeSlots) {
-                                        // Create a ModuleSchedule for each time slot
-                                        boolean isMovable = true; // Set according to your data
+                                        boolean isMovable = true;
                                         ModuleSchedule schedule = new ModuleSchedule(
                                                 module,
                                                 timeSlot,
                                                 isMovable,
                                                 module.isShow());
-
-                                        // Add to the master list
                                         moduleSchedules.add(schedule);
                                     }
                                 }
                             }
                         }
 
-
-
-
-                        // Recreate adapter with fresh data
                         moduleAdapter = new ModuleManagementAdapter(moduleSchedules, TimetableFragment.this);
                         moduleListView.setAdapter(moduleAdapter);
 
-                        // Refresh the timetable grid
                         displayTimetable();
                     } else {
-                        // Handle empty data case
                         emptyView.setVisibility(View.VISIBLE);
                     }
                 }
@@ -605,8 +588,7 @@ public class TimetableFragment extends Fragment implements ModuleManagementAdapt
                     emptyCell.setBackgroundColor(Color.LTGRAY);
                     row.addView(emptyCell);
                 } else {
-                    // TODO: Handle multiple modules in the same time slot properly
-                    ModuleSchedule schedule = schedulesForSlot.get(0); // Just take the first one if multiple
+                    ModuleSchedule schedule = schedulesForSlot.get(0);
                     Module module = schedule.getModule();
 
                     View moduleView = inflater.inflate(R.layout.item_timetable_module, null);

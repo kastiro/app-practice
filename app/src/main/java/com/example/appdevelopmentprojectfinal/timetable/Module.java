@@ -32,7 +32,6 @@ public class Module {
         this.alternativeSlots = new ArrayList<>();
     }
 
-    // Getters
     public String getCode() { return code; }
     public String getName() { return name; }
     public boolean isShow() {
@@ -63,7 +62,6 @@ public class Module {
         this.alternativeSlots = alternativeSlots;
     }
 
-    // This is used in toString() method
     String getLecturer() { return lecturer; }
 
     @Override

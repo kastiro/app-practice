@@ -24,11 +24,8 @@ import com.example.appdevelopmentprojectfinal.utils.JsonUtil;
 
 public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManagementAdapter.ModuleViewHolder> {
 
-    // For grouping all schedules of the same module
     private final List<ModuleGroup> moduleGroups = new ArrayList<>();
     private final OnModuleVisibilityChangedListener listener;
-
-    // Colors for different modules
     private static final int[] MODULE_COLORS = {
             Color.parseColor("#FFCDD2"), // Light Red
             Color.parseColor("#C8E6C9"), // Light Green
@@ -37,12 +34,10 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             Color.parseColor("#E1BEE7")  // Light Purple
     };
 
-    // Interface for visibility change callbacks
     public interface OnModuleVisibilityChangedListener {
         void onModuleVisibilityChanged();
     }
 
-    // Class to group schedules by module
     public static class ModuleGroup {
         private final Module module;
         private final List<ModuleSchedule> schedules = new ArrayList<>();
@@ -78,7 +73,6 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             }
         }
 
-        // Prepare a string with all schedules of this module
         public String getSchedulesString() {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < schedules.size(); i++) {
@@ -104,7 +98,6 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
     public ModuleManagementAdapter(List<ModuleSchedule> moduleSchedules, OnModuleVisibilityChangedListener listener) {
         this.listener = listener;
 
-        // Group schedules by module
         Map<String, ModuleGroup> moduleMap = new HashMap<>();
 
         for (ModuleSchedule schedule : moduleSchedules) {
@@ -119,7 +112,6 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         }
 
         Log.i("TAG", moduleMap.values().toString());
-        // Add all module groups to the list
         moduleGroups.addAll(moduleMap.values());
     }
 
@@ -136,12 +128,10 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         ModuleGroup moduleGroup = moduleGroups.get(position);
         Module module = moduleGroup.getModule();
 
-        // Set module details
         holder.moduleTitle.setText(module.getCode() + ": " + module.getName());
         holder.moduleLecturer.setText(module.getLecturer());
         holder.moduleSchedule.setText(moduleGroup.getSchedulesString());
 
-        // card color
         int colorIndex = Math.abs(module.getCode().hashCode()) % MODULE_COLORS.length;
         holder.cardView.setCardBackgroundColor(MODULE_COLORS[colorIndex]);
 
@@ -156,21 +146,6 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             listener.onModuleVisibilityChanged();
             jsonUtil.updateShowStatusAndSave(tempContext, module.getCode(), isChecked);
         });
-
-//        // Add scroll button listeners
-//        holder.btnScrollUp.setOnClickListener(v -> {
-//            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
-//            if (recyclerView != null) {
-//                recyclerView.smoothScrollBy(0, -200); // Scroll up by 200px
-//            }
-//        });
-//
-//        holder.btnScrollDown.setOnClickListener(v -> {
-//            RecyclerView recyclerView = (RecyclerView) holder.itemView.getParent();
-//            if (recyclerView != null) {
-//                recyclerView.smoothScrollBy(0, 200); // Scroll down by 200px
-//            }
-//        });
     }
 
     @Override
@@ -185,9 +160,6 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
         Switch visibilityToggle;
         CardView cardView;
 
-        ImageButton btnScrollUp;
-        ImageButton btnScrollDown;
-
         public ModuleViewHolder(@NonNull View itemView) {
             super(itemView);
             moduleTitle = itemView.findViewById(R.id.module_title);
@@ -195,9 +167,6 @@ public class ModuleManagementAdapter extends RecyclerView.Adapter<ModuleManageme
             moduleSchedule = itemView.findViewById(R.id.module_schedule);
             visibilityToggle = itemView.findViewById(R.id.visibility_toggle);
             cardView = (CardView) itemView;
-
-//            btnScrollUp = itemView.findViewById(R.id.btn_scroll_up);
-//            btnScrollDown = itemView.findViewById(R.id.btn_scroll_down);
         }
     }
 }

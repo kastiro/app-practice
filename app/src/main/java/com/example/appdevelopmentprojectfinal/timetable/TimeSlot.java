@@ -1,7 +1,5 @@
 package com.example.appdevelopmentprojectfinal.timetable;
 
-import androidx.annotation.NonNull;
-
 public class TimeSlot {
     private String day;
     private String startTime;
@@ -18,7 +16,6 @@ public class TimeSlot {
         this.location = location;
     }
 
-    // Getters
     public String getDay() { return day; }
     public String getStartTime() { return startTime; }
     public String getEndTime() { return endTime; }

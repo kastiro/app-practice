@@ -21,8 +21,6 @@
 //import java.util.Calendar;
 //import java.util.Date;
 //import java.util.Locale;
-////TODO: Complete the code. Implement saving mechanism for notifications switch.
-////TODO: Edit JSON file to save notifications status.
 //
 //public class TimetableNotificationManager {
 //    private static final String CHANNEL_ID = "timetable_notification_channel";
